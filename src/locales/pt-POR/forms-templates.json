@@ -1,7 +1,7 @@
 {
   "tr_s89Title": "DESIGNAÇÃO PARA A REUNIÃO<br />NOSSA VIDA E MINISTÉRIO CRISTÃO",
   "tr_s89ToBeGiven": "Local:",
-  "tr_s89DescFooter": "Observação para o estudante: A lição e a fonte de matéria para a sua designação estão na Apostila da Reunião Vida e Ministério. Veja as instruções para a parte que estão nas Instruções para a Reunião Nossa Vida e Ministério Cristão (S-38).",
+  "tr_s89DescFooter": "<b>Observação para o estudante:</b> A lição e a fonte de matéria para a sua designação estão na <i>Apostila da Reunião Vida e Ministério</i>. Veja as instruções para a parte que estão nas <i>Instruções para a Reunião Nossa Vida e Ministério Cristão</i> (S-38).",
   "tr_assignment": "Designação",
   "tr_bibleReading": "Leitura da Bíblia",
   "tr_initialCall": "Primeira conversa",
@@ -61,7 +61,7 @@
   "tr_speaker": "Orador",
   "tr_speakerSymposium": "Orador (Simpósio, parte 1)",
   "tr_wtStudyReader": "Leitor do estudo",
-  "tr_weekendMeetingPrint": "Reunião do fim de semana",
+  "tr_weekendMeetingPrint": "Programação da reunião do fim de semana",
   "tr_publicTalk": "Discurso público",
   "tr_openingPrayer": "Oração inicial",
   "tr_noWMeetingWeek": "Não há nenhuma reunião do fim de semana para esta semana",
@@ -108,5 +108,6 @@
   "tr_monthsApprovedAP": "<p>Você foi aprovado para servir como pioneiro auxiliar nos seguintes meses: <strong>{{ months }}</strong>. Você pode preencher e enviar uma petição para os meses futuros a qualquer momento.</p>",
   "tr_averageAttendanceWeekly": "Assistência média por semana",
   "tr_averageAttendanceMonthly": "Assistência média por mês",
-  "tr_S88Title": "REGISTRO DA ASSISTÊNCIA ÀS REUNIÕES CONGREGACIONAIS"
+  "tr_S88Title": "REGISTRO DA ASSISTÊNCIA ÀS REUNIÕES CONGREGACIONAIS",
+  "tr_findScheduleByScanningQRCode": "Encontre a versão mais atualizada desta programação escaneando o código QR ou diretamente no app Organized."
 }

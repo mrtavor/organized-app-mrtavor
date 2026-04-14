@@ -340,7 +340,7 @@ const dbGetTableData = async () => {
 
   const congId = speakers_congregations.find(
     (record) =>
-      record.cong_data.cong_number.value === settings.cong_settings.cong_number
+      record.cong_data.cong_name.value === settings.cong_settings.cong_name
   )?.id;
 
   const outgoing_speakers = visiting_speakers
@@ -541,6 +541,13 @@ const convertObjectToArray = (settings: SettingsType) => {
     };
   }
 
+  if (typeof settings?.cong_settings.cong_number === 'string') {
+    settings.cong_settings.cong_number = {
+      value: settings.cong_settings.cong_number,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
   return settings;
 };
 
@@ -652,6 +659,14 @@ const dbRestorePersons = async (
         // remove old key
         delete person.person_data.categories;
 
+        // clean up keys
+        if (
+          person.person_data.family_members &&
+          typeof person.person_data.family_members === 'string'
+        ) {
+          delete person.person_data.family_members;
+        }
+
         return person;
       }
     );
@@ -737,6 +752,15 @@ const dbRestoreUpcomingEvents = async (
         table: 'upcoming_events',
         accessCode,
       });
+
+      // clean up keys
+      if (event.updatedAt) {
+        event.event_data._deleted = event._deleted;
+        event.event_data.updatedAt = event.updatedAt;
+
+        delete event._deleted;
+        delete event.updatedAt;
+      }
 
       return event;
     });

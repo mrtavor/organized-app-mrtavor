@@ -241,7 +241,8 @@ export const settingSchema: SettingsType = {
   id: 1,
   cong_settings: {
     country_code: '',
-    cong_number: '',
+    cong_id: '',
+    cong_number: { value: '', updatedAt: '' },
     cong_name: '',
     cong_master_key: '',
     cong_access_code: '',
@@ -318,7 +319,7 @@ export const settingSchema: SettingsType = {
         opening_prayer_auto_assigned: { value: false, updatedAt: '' },
         time: { value: '00:00', updatedAt: '' },
         substitute_speaker_enabled: { value: false, updatedAt: '' },
-        weekday: { value: 7, updatedAt: '' },
+        weekday: { value: 6, updatedAt: '' },
         w_study_conductor_default: { value: '', updatedAt: '' },
         substitute_w_study_conductor_displayed: { value: true, updatedAt: '' },
         consecutive_monthly_parts_notice_shown: { value: true, updatedAt: '' },
@@ -340,6 +341,9 @@ export const settingSchema: SettingsType = {
     aux_class_fsg: { value: false, updatedAt: '' },
     first_day_week: [
       { type: 'main', value: 1, _deleted: false, updatedAt: '' },
+    ],
+    schedule_songs_weekend: [
+      { type: 'main', value: false, _deleted: false, updatedAt: '' },
     ],
   },
   user_settings: {
@@ -363,6 +367,8 @@ export const settingSchema: SettingsType = {
 export const upcomingEventsSchema: UpcomingEventType = {
   event_uid: '',
   event_data: {
+    _deleted: false,
+    updatedAt: '',
     start: '',
     end: '',
     description: '',

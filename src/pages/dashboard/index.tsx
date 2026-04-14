@@ -17,6 +17,7 @@ import PersonsCard from './persons';
 import ReportsCard from './reports';
 import Snackbar from '@components/snackbar';
 import Typography from '@components/typography';
+import PageTitle from '@components/page_title';
 
 const Dashboard = () => {
   const { t } = useAppTranslation();
@@ -29,6 +30,7 @@ const Dashboard = () => {
     isPersonViewer,
     isElder,
     isAttendanceEditor,
+    isGroupOverseer,
   } = useCurrentUser();
 
   const {
@@ -41,6 +43,7 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <PageTitle />
       <Box
         sx={{
           display: 'flex',
@@ -89,7 +92,7 @@ const Dashboard = () => {
 
         {isMeetingEditor && <MeetingsMaterialsCard />}
 
-        {(isElder || isAttendanceEditor) && <ReportsCard />}
+        {(isElder || isAttendanceEditor || isGroupOverseer) && <ReportsCard />}
 
         <CongregationCard />
       </Box>

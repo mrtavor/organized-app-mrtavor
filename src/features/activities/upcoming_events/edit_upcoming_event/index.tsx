@@ -12,12 +12,12 @@ import useEditUpcomingEvent from './useEditUpcomingEvent';
 import Button from '@components/button';
 import DatePicker from '@components/date_picker';
 import Divider from '@components/divider';
+import IconButton from '@components/icon_button';
 import MenuItem from '@components/menuitem';
 import Select from '@components/select';
 import TextField from '@components/textfield';
 import TimePicker from '@components/time_picker';
 import Typography from '@components/typography';
-import IconButton from '@components/icon_button';
 
 const EditUpcomingEvent = (props: EditUpcomingEventProps) => {
   const { t } = useAppTranslation();
@@ -66,13 +66,13 @@ const EditUpcomingEvent = (props: EditUpcomingEventProps) => {
             : t('tr_editUpcomingEvent')}
         </Typography>
 
-        {!tabletUp && (
+        {props.type === 'edit' && !tabletUp && (
           <IconButton onClick={handleDeleteEvent} color="error">
             <IconDelete color="var(--red-main)" height={20} width={20} />
           </IconButton>
         )}
 
-        {tabletUp && (
+        {props.type === 'edit' && tabletUp && (
           <Button
             variant="small"
             color="red"
@@ -99,13 +99,9 @@ const EditUpcomingEvent = (props: EditUpcomingEventProps) => {
           sx={{
             display: 'flex',
             flexDirection: 'row',
-
             gap: '16px',
             flexWrap: !desktopUp ? 'wrap' : 'nowrap',
-
-            '& > *': {
-              flex: !desktopUp ? 'none' : '1',
-            },
+            '& > *': { flex: !desktopUp ? 'none' : '1' },
           }}
         >
           <Select

@@ -146,6 +146,7 @@
   "tr_startTime": "Manomboka",
   "tr_endTime": "Mifarana",
   "tr_days": "{{ daysCount }} andro",
+  "tr_created": "Created: {{ date }}",
   "tr_missingInfo": "Tsy feno ny fanazavana",
   "tr_fillRequiredField": "Fenoy azafady ireo fanazavana ilaina",
   "tr_mondayShort": "Alats",
@@ -155,5 +156,15 @@
   "tr_fridayShort": "Zom",
   "tr_saturdayShort": "Asab",
   "tr_sundayShort": "Alah",
-  "tr_dateRangeNoYear": "{{ startDate }}-{{ endDate }}"
+  "tr_dateRangeNoYear": "{{ startDate }}-{{ endDate }}",
+  "tr_dateAlreadyExists": "This date already exists",
+  "tr_period": "Period",
+  "tr_groups": "Groups",
+  "tr_months": "Months",
+  "tr_fileChoose": "Select file",
+  "tr_templateDownload": "Download template",
+  "tr_fileImport": "Import file",
+  "tr_csvImportDescription": "For best results when importing, use the template file. \nNot all columns need to be filled out.\nColumns will be processed in the order they appear.\nIf a status or task should be activated, a '1' or 'true' must be specified.\nBoth ';' and ',' are allowed as delimiters.",
+  "tr_importSuccess": "Import completed! {{ successCount }} out of {{ totalCount }} persons were saved.",
+  "tr_bottomActionsMenu": "Bottom actions menu"
 }

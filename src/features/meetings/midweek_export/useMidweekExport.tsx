@@ -43,6 +43,7 @@ import { addDays } from '@utils/date';
 import { headerForScheduleState } from '@states/field_service_groups';
 import { WEEK_TYPE_NO_MEETING } from '@constants/index';
 import { formatDate } from 'date-fns';
+import { sourcesState } from '@states/sources';
 
 const useMidweekExport = (onClose: MidweekExportType['onClose']) => {
   const [S89Template, setS89Template] = useAtom(S89TemplateState);
@@ -58,6 +59,7 @@ const useMidweekExport = (onClose: MidweekExportType['onClose']) => {
   const sourceLocale = useAtomValue(JWLangLocaleState);
   const meetingExactDate = useAtomValue(meetingExactDateState);
   const midweekDay = useAtomValue(midweekMeetingWeekdayState);
+  const sources = useAtomValue(sourcesState);
 
   const [startWeek, setStartWeek] = useState('');
   const [endWeek, setEndWeek] = useState('');
@@ -171,7 +173,7 @@ const useMidweekExport = (onClose: MidweekExportType['onClose']) => {
         )
       ).toBlob();
 
-      const toAdd = meetingExactDate ? midweekDay - 1 : 0;
+      const toAdd = meetingExactDate ? midweekDay : 0;
 
       const firstWeek = formatDate(
         addDays(S140.at(0).weekOf, toAdd),
@@ -203,6 +205,10 @@ const useMidweekExport = (onClose: MidweekExportType['onClose']) => {
           schedule.weekOf >= startWeek && schedule.weekOf <= endWeek;
 
         if (!isValid) return false;
+
+        const source = sources.find((src) => src.weekOf === schedule.weekOf)!;
+
+        if (!source.midweek_meeting.week_date_locale[lang]) return false;
 
         if (dataView !== 'main') {
           const weekType =

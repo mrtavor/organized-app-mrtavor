@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
-import { Document, Page, View } from '@react-pdf/renderer';
-import { LANGUAGE_LIST } from '@constants/index';
+import { Page, View } from '@react-pdf/renderer';
+import { Document } from '@views/components';
 import { S89DataType } from '@definition/schedules';
 import { S89Doc4in1Type } from './index.types';
 import { useAppTranslation } from '@hooks/index';
@@ -18,10 +18,6 @@ registerFonts();
 const TemplateS89Doc4in1 = ({ s89Data, lang }: S89Doc4in1Type) => {
   const { t } = useAppTranslation();
 
-  const font =
-    LANGUAGE_LIST.find((record) => record.threeLettersCode === lang)?.font ||
-    'Inter';
-
   const formatData = () => {
     const data: S89DataType[][] = [];
 
@@ -34,19 +30,11 @@ const TemplateS89Doc4in1 = ({ s89Data, lang }: S89Doc4in1Type) => {
   return (
     <>
       {s89Data.length > 0 && (
-        <Document
-          author="sws2apps"
-          title="S-89"
-          creator="Organized"
-          producer="sws2apps (by react-pdf)"
-        >
-          <Page
-            size="A4"
-            style={[styles.body, stylesCustom.page, { fontFamily: font }]}
-          >
+        <Document title="S-89" lang={lang}>
+          <Page size="A4" style={[styles.body, stylesCustom.page]}>
             {formatData().map((groupedData, groupedIndex) => {
               return (
-                <Fragment key={groupedIndex}>
+                <Fragment key={groupedData.map((d) => d.id).join('-')}>
                   {groupedData.map((data, index) => (
                     <View
                       key={data.id}
@@ -86,11 +74,12 @@ const TemplateS89Doc4in1 = ({ s89Data, lang }: S89Doc4in1Type) => {
                           aux_class_1={data.aux_class_1}
                           aux_class_2={data.aux_class_2}
                         />
-
-                        <S89StudentNote lang={lang} />
                       </View>
 
-                      <S89Footer lang={lang} />
+                      <View style={styles.bottomSection}>
+                        <S89StudentNote lang={lang} />
+                        <S89Footer lang={lang} />
+                      </View>
                     </View>
                   ))}
                 </Fragment>

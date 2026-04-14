@@ -43,6 +43,7 @@
   "tr_incompleteCongregationInfo": "Tiyaking naibigay ang lahat ng kailangang detalye para sa iyong kongregasyon",
   "tr_firstname": "First name",
   "tr_lastname": "Last name",
+  "tr_gender": "Kasarian",
   "tr_encryptionCode": "Encryption code",
   "tr_encryptionCodeSetupDesc": "Gumawa ng encryption code para sa iyong kongregasyon.",
   "tr_encryptionCodeLostDesc": "Ilagay ang encryption code ng iyong kongregasyon upang ma-access ito",
@@ -128,5 +129,6 @@
   "tr_loginWithEmail": "Email login",
   "tr_loginWithEmailDesc": "Gamitin ang Google, Yahoo, o iba pang email para makagawa at magamit ang iyong account kahit kailan, gamit ang anumang device.",
   "tr_loginWithCode": "Invitation code login",
-  "tr_loginWithCodeDesc": "Makaka-access ka lang sa browser na ito gamit ang one-time code. Kailangan ng panibagong code sa bawat pag-access.\n\n"
+  "tr_loginWithCodeDesc": "Makaka-access ka lang sa browser na ito gamit ang one-time code. Kailangan ng panibagong code sa bawat pag-access.\n\n",
+  "tr_loginEmailCode": "Maaari mo ring ilagay ang secure code na ipinadala sa email mo."
 }

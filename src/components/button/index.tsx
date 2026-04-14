@@ -13,6 +13,7 @@ const Button: FC<ButtonPropsType> = (props) => {
   const variant = props.variant || 'main';
   const disableAutoStretch = props.disableAutoStretch || false;
   const color = props.color;
+  const ariaLabel = props.ariaLabel;
 
   let internalVariant: ButtonProps['variant'] = 'contained';
 
@@ -191,6 +192,7 @@ const Button: FC<ButtonPropsType> = (props) => {
     <MUIButton
       startIcon={props.startIcon}
       endIcon={props.endIcon}
+      aria-label={ariaLabel}
       variant={internalVariant}
       onClick={props.onClick}
       disableRipple
@@ -200,7 +202,7 @@ const Button: FC<ButtonPropsType> = (props) => {
       href={props.href}
       sx={{
         cursor: 'pointer',
-        minHeight: props.minHeight ? `${props.minHeight}px` : '44px',
+        minHeight: props.minHeight ? `${props.minHeight}px` : '40px',
         fontFeatureSettings: '"cv05"',
         padding: variant === 'small' ? '4px 8px' : '8px 16px',
         backgroundColor: getBackgroundColor(),

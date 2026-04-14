@@ -22,6 +22,9 @@ import {
   uk,
   vi,
   zhCN,
+  hi,
+  bg,
+  he,
 } from 'date-fns/locale';
 import { AppRoleType, LanguageItem } from '@definition/app';
 import { AssignmentCode } from '@definition/assignment';
@@ -357,6 +360,52 @@ export const LANGUAGE_LIST: LanguageItem[] = [
     threeLettersCode: 'nld',
     browserLangCode: ['nl-NL', 'nl'],
     fnsLocale: nl,
+  },
+  {
+    code: 'lsb',
+    locale: 'pt-LSB',
+    name: 'Língua brasileira de sinais (Libras)',
+    source: true,
+    threeLettersCode: 'lsb',
+    browserLangCode: ['pt-BR', 'pt'],
+    fnsLocale: ptBR,
+  },
+  {
+    code: 'hi',
+    locale: 'hi-IN',
+    name: 'हिंदी',
+    source: true,
+    font: 'NotoSans',
+    threeLettersCode: 'hin',
+    browserLangCode: ['hi-IN', 'hi'],
+    fnsLocale: hi,
+  },
+  {
+    code: 'th',
+    locale: 'ty-PF',
+    name: 'Tahiti',
+    source: true,
+    threeLettersCode: 'tah',
+  },
+  {
+    code: 'BL',
+    locale: 'bg-BG',
+    name: 'български',
+    source: true,
+    threeLettersCode: 'bul',
+    fnsLocale: bg,
+    browserLangCode: ['bg-BG', 'bg'],
+  },
+  {
+    direction: 'rtl',
+    code: 'Q',
+    locale: 'he-IL',
+    name: 'עברית',
+    source: true,
+    threeLettersCode: 'heb',
+    fnsLocale: he,
+    browserLangCode: ['he-IL', 'he'],
+    font: 'NotoSansHebrew',
   },
 ].sort((a, b) => a.code.localeCompare(b.code));
 

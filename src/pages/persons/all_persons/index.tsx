@@ -2,6 +2,7 @@ import { Box, Slide } from '@mui/material';
 import { Button, PageTitle } from '@components/index';
 import {
   IconAddPerson,
+  IconImportExport,
   IconPanelClose,
   IconPanelOpen,
 } from '@components/icons';
@@ -11,40 +12,65 @@ import {
   useCurrentUser,
 } from '@hooks/index';
 import useAllPersons from './useAllPersons';
-import ExportPersons from '@features/persons/export_persons';
+
 import PersonsList from '@features/persons/list';
 import PersonsFilter from '@features/persons/filter';
 import PersonsSearch from '@features/persons/search';
+import NavBarButton from '@components/nav_bar_button';
+import ImportExport from '@features/persons/import_export';
 
 const PersonsAll = () => {
   const { t } = useAppTranslation();
 
-  const { desktopUp } = useBreakpoints();
+  const { desktopUp, tablet688Up } = useBreakpoints();
 
   const { isPersonEditor } = useCurrentUser();
 
-  const { handlePersonAdd, isPanelOpen, setIsPanelOpen } = useAllPersons();
+  const {
+    handlePersonAdd,
+    isPanelOpen,
+    setIsPanelOpen,
+    handleOpenExchange,
+    isDataExchangeOpen,
+    handleCloseExchange,
+  } = useAllPersons();
 
   return (
-    <Box sx={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        gap: '16px',
+        flexDirection: 'column',
+        paddingBottom: !tablet688Up ? '60px' : '0px',
+      }}
+    >
       <PageTitle
         title={t('tr_personsAll')}
         buttons={
           isPersonEditor && (
             <>
-              <ExportPersons />
-              <Button
-                variant="main"
-                startIcon={<IconAddPerson />}
+              <NavBarButton
+                text={t('tr_importExport')}
+                main={false}
+                icon={<IconImportExport />}
+                onClick={handleOpenExchange}
+              ></NavBarButton>
+              <NavBarButton
+                text={t('tr_btnAdd')}
+                main
+                icon={<IconAddPerson />}
                 onClick={handlePersonAdd}
-              >
-                {t('tr_btnAdd')}
-              </Button>
+              ></NavBarButton>
             </>
           )
         }
       />
 
+      <ImportExport
+        key={isDataExchangeOpen ? 'open' : 'closed'}
+        open={isDataExchangeOpen}
+        onClose={handleCloseExchange}
+      />
       <Box
         sx={{
           display: 'flex',

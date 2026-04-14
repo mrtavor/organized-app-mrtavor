@@ -277,12 +277,17 @@ export type WeekendMeetingTimingsType = {
 };
 
 export type WeekendMeetingDataType = {
+  show_songs: boolean;
   date_formatted: string;
   weekOf: string;
   no_meeting: boolean;
   week_type: Week;
   week_type_name: string;
   event_name: string;
+  opening_song: number;
+  opening_song_title: string;
+  middle_song: number;
+  closing_song: number;
   chairman_name: string;
   opening_prayer_name: string;
   public_talk_title?: string;
@@ -301,3 +306,13 @@ export type WeekendMeetingDataType = {
   wt_study: boolean;
   wt_study_only: boolean;
 };
+
+export type OutgoingSpeakersScheduleItem = {
+  opening_song: { title: string; number: number };
+  public_talk: { title: string; number: number };
+  speaker: string;
+  congregation_name: string;
+  date: { date: Date; formatted: string };
+};
+
+export type OutgoingSpeakersScheduleType = OutgoingSpeakersScheduleItem[];

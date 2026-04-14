@@ -1,7 +1,7 @@
 {
   "tr_s89Title": "NALOGA NA SHODU NAŠE KRŠČANSKO<br />ŽIVLJENJE IN OZNANJEVANJE",
   "tr_s89ToBeGiven": "Nalogo boš imel v:",
-  "tr_s89DescFooter": "Opomba učencu: Snov in učno enoto za svojo nalogo lahko najdeš v publikaciji Življenje in oznanjevanje – delovni zvezek. Prosimo, preberi navodila za dodeljeno ti točko, ki jih najdeš v dokumentu Navodila za shod Naše krščansko življenje in oznanjevanje (S-38).",
+  "tr_s89DescFooter": "<b>Opomba učencu:</b> Snov in učno enoto za svojo nalogo lahko najdeš v publikaciji <i>Življenje in oznanjevanje – delovni zvezek</i>. Prosimo, preberi navodila za dodeljeno ti točko, ki jih najdeš v dokumentu <i>Navodila za shod Naše krščansko življenje in oznanjevanje</i> (S-38).",
   "tr_assignment": "Naloga",
   "tr_bibleReading": "Branje Biblije",
   "tr_initialCall": "Prvi obisk",
@@ -108,5 +108,6 @@
   "tr_monthsApprovedAP": "<p>Odobreno je, da lahko kot pomožni pionir služiš v naslednjih mesecih: <strong>{{ months }}</strong>. Prošnjo za prihodnje mesece lahko oddaš kadar koli.</p>",
   "tr_averageAttendanceWeekly": "Povprečno prisotnih vsak teden",
   "tr_averageAttendanceMonthly": "Povprečno prisotnih vsak mesec",
-  "tr_S88Title": "POROČILO O OBISKU SHODOV"
+  "tr_S88Title": "POROČILO O OBISKU SHODOV",
+  "tr_findScheduleByScanningQRCode": "Najnovejšo različico tega razporeda poišči s skeniranjem QR kode ali neposredno v aplikaciji Organized."
 }

@@ -1,7 +1,7 @@
 {
   "tr_s89Title": "FELADAT A KERESZTÉNYI ÉLETÜNK<br />ÉS SZOLGÁLATUNK ÖSSZEJÖVETELEN",
   "tr_s89ToBeGiven": "Helyszín:",
-  "tr_s89DescFooter": "Megjegyzés a tanulónak: A forrásanyagot és a szempontot az Életünk és szolgálatunk – Munkafüzetben találhatod meg. Kérjük, nézd át a programrészhez tartozó leírást az Útmutató a keresztényi életünk és szolgálatunk összejövetelhez (S-38) dokumentumban.",
+  "tr_s89DescFooter": "<b>Megjegyzés a tanulónak:</b> A forrásanyagot és a szempontot az <i>Életünk és szolgálatunk – Munkafüzetben</i> találhatod meg. Kérjük, nézd át a programrészhez tartozó leírást az <i>Útmutató a keresztényi életünk és szolgálatunk összejövetelhez</i> (S-38) dokumentumban.",
   "tr_assignment": "Feladat",
   "tr_bibleReading": "Bibliaolvasás",
   "tr_initialCall": "Első látogatás",
@@ -41,11 +41,11 @@
   "tr_bethelTour": "Bétel-látogatás",
   "tr_specialProgram": "Különleges összejövetel",
   "tr_publicWitnessing": "Közterületi tanúskodás képzés",
-  "tr_kingdomDedication": "Kingdom Hall dedication",
+  "tr_kingdomDedication": "Királyságterem felszentelés",
   "tr_annualMeeting": "Évi közgyűlés",
   "tr_custom": "Egyedi",
   "tr_additionalInfo": "További információ",
-  "tr_shortTimeFormat": "Ó:PP",
+  "tr_shortTimeFormat": "H:MM",
   "tr_initialCallVideo": "Első látogatás videó",
   "tr_returnVisitVideo": "Újralátogatás videó",
   "tr_memorialInviteVideo": "Emlékünnepi meghívó videó",
@@ -61,7 +61,7 @@
   "tr_speaker": "Előadó",
   "tr_speakerSymposium": "Előadó (első 15 perc)",
   "tr_wtStudyReader": "ŐT — olvasó",
-  "tr_weekendMeetingPrint": "Hétvégi összejövetelek ütemterve",
+  "tr_weekendMeetingPrint": "Weekend meeting schedule",
   "tr_publicTalk": "Nyilvános előadás",
   "tr_openingPrayer": "Nyitó ima",
   "tr_noWMeetingWeek": "Ezen a héten nincs hétvégi összejövetel",
@@ -108,5 +108,6 @@
   "tr_monthsApprovedAP": "<p>Jóváhagyták, hogy kisegítő úttörőként szolgálj a következő hónapokban: <strong>{{ months }}</strong>. Bármikor jelentkezhetsz a jövőbeli hónapokra is.</p>",
   "tr_averageAttendanceWeekly": "Jelenlévők átlaglétszáma hetente",
   "tr_averageAttendanceMonthly": "Jelenlévők átlaglétszáma havonta",
-  "tr_S88Title": "ÖSSZEJÖVETELI LÉTSZÁMADATLAP"
+  "tr_S88Title": "ÖSSZEJÖVETELI LÉTSZÁMADATLAP",
+  "tr_findScheduleByScanningQRCode": "A beosztás legfrissebb verzióját a QR-kód beolvasásával vagy közvetlenül az Organized alkalmazásban találod meg."
 }

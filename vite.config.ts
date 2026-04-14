@@ -46,15 +46,23 @@ export default defineConfig({
     ],
   },
   worker: { plugins: () => [comlink()] },
-  server: { port: 4050, host: true },
+  server: {
+    port: 4050,
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   preview: { port: 4050 },
   build: {
     chunkSizeWarningLimit: 2500,
     target: 'esnext',
     rollupOptions: {
-      output: {
-        manualChunks: { vendor: ['react'] },
-      },
+      output: { manualChunks: { vendor: ['react'] } },
     },
   },
 });

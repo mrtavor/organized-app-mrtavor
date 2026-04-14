@@ -1,11 +1,11 @@
 {
   "tr_s89Title": "OUR CHRISTIAN LIFE AND MINISTRY<br />MEETING ASSIGNMENT",
   "tr_s89ToBeGiven": "To be given in:",
-  "tr_s89DescFooter": "Note to student: The source material and study point for your assignment can be found in the Life and Ministry Meeting Workbook. Please review the instructions for the part as outlined in Instructions for Our Christian Life and Ministry Meeting (S-38).",
+  "tr_s89DescFooter": "<b>Note to student:</b> The source material and study point for your assignment can be found in the <i>Life and Ministry Meeting Workbook</i>. Please review the instructions for the part as outlined in <i>Instructions for Our Christian Life and Ministry Meeting</i> (S-38).",
   "tr_assignment": "Assignment",
   "tr_bibleReading": "Pagbabasa ng Bibliya",
   "tr_initialCall": "Unang Pag-uusap",
-  "tr_returnVisit": "Pagdalaw-Muli",
+  "tr_returnVisit": "Pakikipag-usap Muli",
   "tr_bibleStudy": "Pag-aaral ng Bibliya",
   "tr_talk": "Pahayag",
   "tr_mainHall": "Main Hall",
@@ -61,7 +61,7 @@
   "tr_speaker": "Speaker",
   "tr_speakerSymposium": "Speaker (Symposium, bahagi 1)",
   "tr_wtStudyReader": "Tagabasa",
-  "tr_weekendMeetingPrint": "Weekend Meeting Schedule",
+  "tr_weekendMeetingPrint": "Weekend meeting schedule",
   "tr_publicTalk": "Pahayag Pangmadla",
   "tr_openingPrayer": "Pambukas na Panalangin",
   "tr_noWMeetingWeek": "Walang pulong ngayong weekend",
@@ -108,5 +108,6 @@
   "tr_monthsApprovedAP": "<p>Ikaw ay inaprubahan na maglingkod bilang auxiliary pioneer sa buwan ng: <strong>{{ months }}</strong>. Maaari kang mag-apply sa susunod pang mga buwan anumang oras.</p>",
   "tr_averageAttendanceWeekly": "Average Attendance kada Linggo",
   "tr_averageAttendanceMonthly": "Average Attendance kada Buwan",
-  "tr_S88Title": "CONGREGATION MEETING ATTENDANCE RECORD"
+  "tr_S88Title": "CONGREGATION MEETING ATTENDANCE RECORD",
+  "tr_findScheduleByScanningQRCode": "Hanapin ang pinakabagong version ng iskedyul sa pag-scan ng QR code o sa Organized app mismo."
 }

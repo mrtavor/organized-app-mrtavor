@@ -1,7 +1,7 @@
 {
   "tr_s89Title": "LIVET OCH TJÄNSTEN SOM KRISTEN<br />MÖTESUPPGIFT",
   "tr_s89ToBeGiven": "Att hållas i:",
-  "tr_s89DescFooter": "Notering till elev: Källmaterialet och studiepunkten för din uppgift kan hittas i Arbetshäftet Livet och Tjänsten. Vänligen granska instruktionerna för delen som beskrivs i Instruktioner för vårt kristna liv och tjänstemöte (S-38).",
+  "tr_s89DescFooter": "<b>Notering till elev:</b> Källmaterialet och studiepunkten för din uppgift kan hittas i <i>Arbetshäftet Livet och Tjänsten</i>. Vänligen granska instruktionerna för delen som beskrivs i <i>Instruktioner för vårt kristna liv och tjänstemöte</i> (S-38).",
   "tr_assignment": "Uppgift",
   "tr_bibleReading": "Bibelläsning",
   "tr_initialCall": "Första besök",
@@ -61,7 +61,7 @@
   "tr_speaker": "Talare",
   "tr_speakerSymposium": "Talare (Symposium, del 1)",
   "tr_wtStudyReader": "Läsare",
-  "tr_weekendMeetingPrint": "Schema för helgmöte",
+  "tr_weekendMeetingPrint": "Schema för helgmötet",
   "tr_publicTalk": "Offentligt föredrag",
   "tr_openingPrayer": "Inledande bön",
   "tr_noWMeetingWeek": "Inget helgmöte denna vecka",
@@ -108,5 +108,6 @@
   "tr_monthsApprovedAP": "<p>Du har blivit godkänd som hjälppionjär under de följande månaderna: <strong>{{ months }}</strong>. Du kan när som helst söka för kommande månader.</p>",
   "tr_averageAttendanceWeekly": "Genomsnittlig närvaro varje vecka",
   "tr_averageAttendanceMonthly": "Genomsnittlig närvaro varje månad",
-  "tr_S88Title": "REGISTERKORT FÖR MÖTESNÄRVARO"
+  "tr_S88Title": "REGISTERKORT FÖR MÖTESNÄRVARO",
+  "tr_findScheduleByScanningQRCode": "Hitta den senaste versionen av schemat genom att skanna QR-koden eller se direkt i Organized."
 }

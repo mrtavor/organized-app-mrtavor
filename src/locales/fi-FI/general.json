@@ -146,6 +146,7 @@
   "tr_startTime": "Aloitusaika",
   "tr_endTime": "Päättymisaika",
   "tr_days": "{{ daysCount }} päivää",
+  "tr_created": "Luotu: {{ date }}",
   "tr_missingInfo": "Puuttuvia tietoja",
   "tr_fillRequiredField": "Täytä pakolliset kentät",
   "tr_mondayShort": "Ma",
@@ -155,5 +156,15 @@
   "tr_fridayShort": "Pe",
   "tr_saturdayShort": "La",
   "tr_sundayShort": "Su",
-  "tr_dateRangeNoYear": "{{ startDate }}-{{ endDate }}"
+  "tr_dateRangeNoYear": "{{ startDate }}-{{ endDate }}",
+  "tr_dateAlreadyExists": "Päivämäärä on jo olemassa",
+  "tr_period": "Kausi",
+  "tr_groups": "Ryhmät",
+  "tr_months": "Kuukaudet",
+  "tr_fileChoose": "Valitse tiedosto",
+  "tr_templateDownload": "Lataa malli",
+  "tr_fileImport": "Tuo tiedosto",
+  "tr_csvImportDescription": "Parhaan tuloksen saavuttamiseksi tuonnissa käytä mallitiedostoa.\nKaikkia sarakkeita ei tarvitse täyttää.\nSarakkeet käsitellään siinä järjestyksessä kuin ne esiintyvät.\nJos tila tai tehtävä tulee aktivoida, on määritettävä arvo ’1’ tai ’true’.\nSekä ’;’ että ’,’ ovat sallittuja erottimina.",
+  "tr_importSuccess": "Tuonti valmis! {{ successCount }} / {{ totalCount }} henkilöä tallennettiin.",
+  "tr_bottomActionsMenu": "Toimintojen alavalikko"
 }

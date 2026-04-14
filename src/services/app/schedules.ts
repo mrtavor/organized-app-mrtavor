@@ -24,6 +24,7 @@ import {
   settingsState,
   meetingExactDateState,
   congNameState,
+  weekendSchedulesSongsWeekend,
 } from '@states/settings';
 import { sourcesState } from '@states/sources';
 import {
@@ -52,6 +53,7 @@ import {
   AssignmentCongregation,
   AssignmentHistoryType,
   MidweekMeetingDataType,
+  OutgoingSpeakersScheduleType,
   S89DataType,
   SchedWeekType,
   WeekendMeetingDataType,
@@ -81,13 +83,14 @@ import {
   addMonths,
   addWeeks,
   formatDate,
+  formatDateShortMonthWithYear,
   generateDateFromTime,
   timeAddMinutes,
 } from '@utils/date';
 import { applyAssignmentFilters, personIsElder } from './persons';
 import { personsByViewState } from '@states/persons';
 import { personsStateFind } from '@services/states/persons';
-import { buildPersonFullname } from '@utils/common';
+import { buildPersonFullname, personGetDisplayName } from '@utils/common';
 import { sourcesFind } from '@services/states/sources';
 import { weekTypeLocaleState } from '@states/weekType';
 import { VisitingSpeakerType } from '@definition/visiting_speakers';
@@ -101,7 +104,11 @@ import {
   languageGroupsState,
 } from '@states/field_service_groups';
 import { monthNamesState, monthShortNamesState } from '@states/app';
-import { getTranslation } from '@services/i18n/translation';
+import {
+  generateMonthShortNames,
+  getTranslation,
+} from '@services/i18n/translation';
+import { songsLocaleState } from '@states/songs';
 
 export const schedulesWeekAssignmentsInfo = (
   week: string,
@@ -1410,14 +1417,10 @@ export const schedulesPersonNoPartWithinMonth = ({
       }
 
       if (classroom) {
-        const lastAssignmentType = lastAssignment?.assignment.code;
         const lastAssignmentClassroom = lastAssignment?.assignment.classroom;
         const hasAux = classCount === 2;
 
-        if (
-          lastAssignmentType !== type &&
-          (!hasAux || (hasAux && lastAssignmentClassroom !== classroom))
-        ) {
+        if (!hasAux || (hasAux && lastAssignmentClassroom !== classroom)) {
           selected = person;
           break;
         }
@@ -1482,13 +1485,9 @@ export const schedulesPersonNoPartWithin2Weeks = ({
 
       if (classroom) {
         const lastAssignmentClassroom = lastAssignment?.assignment.classroom;
-        const lastAssignmentType = lastAssignment?.assignment.code;
         const hasAux = classCount === 2;
 
-        if (
-          lastAssignmentType !== type &&
-          (!hasAux || (hasAux && lastAssignmentClassroom !== classroom))
-        ) {
+        if (!hasAux || (hasAux && lastAssignmentClassroom !== classroom)) {
           selected = person;
           break;
         }
@@ -1546,13 +1545,9 @@ export const schedulesPersonNoPartSameWeek = ({
 
       if (classroom) {
         const lastAssignmentClassroom = lastAssignment?.assignment.classroom;
-        const lastAssignmentType = lastAssignment?.assignment.code;
         const hasAux = classCount === 2;
 
-        if (
-          lastAssignmentType !== type &&
-          (!hasAux || (hasAux && lastAssignmentClassroom !== classroom))
-        ) {
+        if (!hasAux || (hasAux && lastAssignmentClassroom !== classroom)) {
           selected = person;
           break;
         }
@@ -2406,9 +2401,6 @@ export const schedulesMidweekData = (
 
   const scheduleDate = meetingDate.locale;
 
-  result.schedule_title =
-    scheduleDate + ' | ' + source.midweek_meeting.weekly_bible_reading[lang];
-
   const week_type =
     schedule.midweek_meeting.week_type.find(
       (record) => record.type === dataView
@@ -2420,6 +2412,14 @@ export const schedulesMidweekData = (
 
   result.week_type = week_type;
   result.no_meeting = WEEK_TYPE_NO_MEETING.includes(week_type);
+
+  const bibleReading = source.midweek_meeting.weekly_bible_reading[lang];
+
+  if (!result.no_meeting && bibleReading && bibleReading.length > 0) {
+    result.schedule_title = scheduleDate + ' | ' + bibleReading;
+  } else {
+    result.schedule_title = scheduleDate;
+  }
 
   result.full = MIDWEEK_FULL.includes(week_type);
   result.treasures = MIDWEEK_WITH_TREASURES_TALKS.includes(week_type);
@@ -2813,15 +2813,18 @@ export const schedulesWeekendData = (
     weekendMeetingOpeningPrayerAutoAssignState
   );
 
-  const shortDateFormat = store.get(shortDateFormatState);
   const fullnameOption = store.get(fullnameOptionState);
   const useDisplayName = store.get(displayNameMeetingsEnableState);
   const defaultWTStudyConductor = store.get(defaultWTStudyConductorNameState);
   const lang = store.get(JWLangState);
   const congName = store.get(congNameState);
   const languageGroups = store.get(languageGroupsState);
+  const songs = store.get(songsLocaleState);
+  const showSongs = store.get(weekendSchedulesSongsWeekend);
 
   const result = {} as WeekendMeetingDataType;
+
+  result.show_songs = showSongs;
   result.weekOf = schedule.weekOf;
 
   const { date } = schedulesGetMeetingDate({
@@ -2829,7 +2832,7 @@ export const schedulesWeekendData = (
     meeting: 'weekend',
   });
 
-  result.date_formatted = formatDate(new Date(date), shortDateFormat);
+  result.date_formatted = formatDateShortMonthWithYear(date);
 
   const week_type =
     schedule.weekend_meeting.week_type.find(
@@ -2842,6 +2845,21 @@ export const schedulesWeekendData = (
   result.full = WEEKEND_FULL.includes(week_type);
   result.talk = WEEKEND_WITH_TALKS.includes(week_type);
   result.wt_study = WEEKEND_WITH_WTSTUDY.includes(week_type);
+
+  result.opening_song =
+    +source.weekend_meeting.song_first.find(
+      (record) => record.type === dataView
+    )?.value || 0;
+
+  if (result.opening_song > 0) {
+    const songTitle =
+      songs.find((record) => record.song_number === result.opening_song)
+        ?.song_title || '';
+
+    result.opening_song_title = songTitle.replace(/^\d+\.\s*/, '');
+  }
+
+  result.middle_song = +source.weekend_meeting.song_middle[lang];
 
   if (week_type === Week.WATCHTOWER_STUDY) {
     result.wt_study_only = true;
@@ -3022,6 +3040,10 @@ export const schedulesWeekendData = (
     if (closingPrayer?.length > 0) {
       result.concluding_prayer_name = closingPrayer;
     }
+
+    if (!closingPrayer) {
+      result.concluding_prayer_name = result.speaker_1_name;
+    }
   }
 
   if (week_type === Week.CO_VISIT) {
@@ -3038,6 +3060,102 @@ export const schedulesWeekendData = (
     result.public_talk_title = source.weekend_meeting.co_talk_title.public.src;
     result.service_talk_title =
       source.weekend_meeting.co_talk_title.service.src;
+  }
+
+  result.closing_song = +sourcesSongConclude({
+    dataView,
+    source,
+    meeting: 'weekend',
+    lang,
+  });
+
+  return result;
+};
+
+export const groupOutgoingSpeakersByDate = (
+  speakers: OutgoingSpeakersScheduleType
+): OutgoingSpeakersScheduleType[] => {
+  const groups: Record<string, OutgoingSpeakersScheduleType> = {};
+
+  speakers.forEach((item) => {
+    const key = item.date.date.toISOString().slice(0, 10);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+  });
+
+  return Object.values(groups).sort(
+    (a, b) => a[0].date.date.getTime() - b[0].date.date.getTime()
+  );
+};
+
+export const scheduleOutgoingSpeakers = (
+  schedule: SchedWeekType
+): OutgoingSpeakersScheduleType => {
+  const talks = store.get(publicTalksState);
+  const fullnameOption = store.get(fullnameOptionState);
+  const displayNameEnabled = store.get(displayNameMeetingsEnableState);
+  const persons = store.get(personsByViewState);
+  const songs = store.get(songsLocaleState);
+  const lang = store.get(JWLangState);
+
+  const months = generateMonthShortNames();
+
+  const outgoingTalkSchedules =
+    schedule?.weekend_meeting.outgoing_talks.filter(
+      (record) => !record._deleted
+    ) || [];
+
+  const weekDate = new Date(schedule.weekOf);
+
+  const result: OutgoingSpeakersScheduleType = [];
+
+  for (const record of outgoingTalkSchedules) {
+    const speaker = persons.find(
+      (person) => person.person_uid === record.value
+    );
+
+    const speakerName = personGetDisplayName(
+      speaker,
+      displayNameEnabled,
+      fullnameOption
+    );
+
+    const openingSong = songs.find(
+      (song) => song.song_number === +record.opening_song
+    );
+
+    const publicTalk = talks.find(
+      (talk) => talk.talk_number === +record.public_talk
+    );
+
+    const weekDay = weekDate.getDay() === 0 ? 7 : weekDate.getDay();
+    const dayDiff = record.congregation.weekday - weekDay;
+
+    const recordDate = new Date(weekDate);
+    recordDate.setDate(weekDate.getDate() + dayDiff);
+
+    const formattedDate = getTranslation({
+      key: 'tr_longDateWithYearLocale',
+      params: {
+        month: recordDate.getDate(),
+        date: months[recordDate.getMonth()],
+        year: recordDate.getFullYear(),
+      },
+    });
+
+    result.push({
+      opening_song: {
+        title: openingSong?.song_title ?? '',
+        number: openingSong ? parseInt(record.opening_song) : 0,
+      },
+      public_talk: {
+        title: publicTalk?.talk_title?.[lang] ?? '',
+        number: publicTalk ? record.public_talk : 0,
+      },
+      speaker: speakerName ?? '',
+      congregation_name: record.congregation.name ?? '',
+      date: { date: recordDate, formatted: formattedDate },
+    });
   }
 
   return result;
@@ -3112,13 +3230,13 @@ export const schedulesGetMeetingDate = ({
   }
 
   const weekTypes = schedule[`${meeting}_meeting`]
-    .week_type as WeekTypeCongregation[];
+    ?.week_type as WeekTypeCongregation[];
 
   const weekType =
-    weekTypes.find((record) => record.type === dataView)?.value ?? Week.NORMAL;
+    weekTypes?.find((record) => record.type === dataView)?.value ?? Week.NORMAL;
 
   const mainWeekType =
-    weekTypes.find((record) => record.type === 'main')?.value ?? Week.NORMAL;
+    weekTypes?.find((record) => record.type === 'main')?.value ?? Week.NORMAL;
 
   let meetingDay = 0;
 
@@ -3126,7 +3244,7 @@ export const schedulesGetMeetingDate = ({
     meetingDay =
       settings.cong_settings.midweek_meeting.find(
         (record) => record.type === dataView
-      )?.weekday.value ?? 1;
+      )?.weekday.value ?? 2;
 
     if (
       WEEK_TYPE_LANGUAGE_GROUPS.includes(weekType) ||
@@ -3135,7 +3253,7 @@ export const schedulesGetMeetingDate = ({
       meetingDay =
         settings.cong_settings.midweek_meeting.find(
           (record) => record.type === 'main'
-        )?.weekday.value ?? 1;
+        )?.weekday.value ?? 2;
     }
   }
 
@@ -3143,7 +3261,7 @@ export const schedulesGetMeetingDate = ({
     meetingDay =
       settings.cong_settings.weekend_meeting.find(
         (record) => record.type === dataView
-      )?.weekday.value ?? 7;
+      )?.weekday.value ?? 6;
 
     if (
       WEEK_TYPE_LANGUAGE_GROUPS.includes(weekType) ||
@@ -3152,13 +3270,11 @@ export const schedulesGetMeetingDate = ({
       meetingDay =
         settings.cong_settings.weekend_meeting.find(
           (record) => record.type === 'main'
-        )?.weekday.value ?? 7;
+        )?.weekday.value ?? 6;
     }
   }
 
-  const toAdd = meetingDay - 1;
-
-  const meetingDate = addDays(week, toAdd);
+  const meetingDate = addDays(week, meetingDay);
   const vardate = meetingDate.getDate();
   const month = meetingDate.getMonth();
   const year = meetingDate.getFullYear();
