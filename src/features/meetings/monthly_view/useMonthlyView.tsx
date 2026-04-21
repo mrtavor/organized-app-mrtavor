@@ -118,10 +118,11 @@ const useMonthlyView = () => {
   const [addCustomModalWindowWeek, setAddCustomModalWindowWeek] =
     useState(null);
 
-  const thisYearMonths = sourcesFormatted
-    .find((year) => year.value.toString() === currentYear)
-    .months.toReversed()
-    .map((month) => monthNames[month.value]);
+  const thisYearMonths =
+    sourcesFormatted
+      .find((year) => year.value.toString() === currentYear)
+      ?.months.toReversed()
+      .map((month) => monthNames[month.value]) || [];
 
   const monthName = thisYearMonths[selectedMonth];
 
