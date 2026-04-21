@@ -39,10 +39,11 @@ const useMonthlyView = () => {
   const getWeeksByMonthAndYear = useCallback(
     (year: number, month: number) => {
       let weeks = [];
+      const monthStr = `${year}/${String(month + 1).padStart(2, '0')}`;
       sourcesFormatted.forEach((srcYear) => {
         if (srcYear.value == year) {
           weeks = srcYear.months.find(
-            (formattedMonth) => formattedMonth.value == month
+            (formattedMonth) => formattedMonth.value === monthStr
           )?.weeks || [];
         }
       });
@@ -118,11 +119,7 @@ const useMonthlyView = () => {
   const [addCustomModalWindowWeek, setAddCustomModalWindowWeek] =
     useState(null);
 
-  const thisYearMonths =
-    sourcesFormatted
-      .find((year) => year.value.toString() === currentYear)
-      ?.months.toReversed()
-      .map((month) => monthNames[month.value]) || [];
+  const thisYearMonths = monthNames;
 
   const monthName = thisYearMonths[selectedMonth];
 
