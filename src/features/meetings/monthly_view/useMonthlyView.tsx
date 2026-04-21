@@ -1,5 +1,6 @@
 import { AssignmentCode } from '@definition/assignment';
 import { Week } from '@definition/week_type';
+import { weeksInMonth } from '@utils/date';
 import useAppTranslation from '@hooks/useAppTranslation';
 import {
   sourcesCheckAYFExplainBeliefsAssignment,
@@ -38,18 +39,10 @@ const useMonthlyView = () => {
 
   const getWeeksByMonthAndYear = useCallback(
     (year: number, month: number) => {
-      let weeks = [];
       const monthStr = `${year}/${String(month + 1).padStart(2, '0')}`;
-      sourcesFormatted.forEach((srcYear) => {
-        if (srcYear.value == year) {
-          weeks = srcYear.months.find(
-            (formattedMonth) => formattedMonth.value === monthStr
-          )?.weeks || [];
-        }
-      });
-      return weeks;
+      return weeksInMonth(monthStr);
     },
-    [sourcesFormatted]
+    []
   );
 
   const currentYear = new Date().getFullYear().toString();
