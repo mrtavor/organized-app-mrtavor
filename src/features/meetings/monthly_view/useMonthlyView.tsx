@@ -225,19 +225,24 @@ const useMonthlyView = () => {
       changeValueInArrayState(
         setAyfCount,
         index,
-        source.midweek_meeting.ayf_count[lang]
+        source?.midweek_meeting?.ayf_count[lang] || 3
       );
 
       ayfPartsSetters.forEach((setter, setterIndex) => {
-        const ayfPart = source.midweek_meeting[`ayf_part${setterIndex + 1}`];
+        const ayfPart = source?.midweek_meeting[`ayf_part${setterIndex + 1}`];
 
-        changeValueInArrayState(setter, index, ayfPart.type[lang]);
+        let partType = ayfPart?.type[lang];
+        if (!partType || partType === 0) {
+          partType = AssignmentCode.MM_StartingConversation;
+        }
 
-        if (ayfPart.type[lang] === AssignmentCode.MM_ExplainingBeliefs) {
+        changeValueInArrayState(setter, index, partType);
+
+        if (partType === AssignmentCode.MM_ExplainingBeliefs) {
           changeValueInArrayState(
             isTalkAYFPartsSetters[setterIndex],
             index,
-            sourcesCheckAYFExplainBeliefsAssignment(ayfPart.src[lang], lang)
+            sourcesCheckAYFExplainBeliefsAssignment(ayfPart?.src[lang], lang)
           );
         }
       });
