@@ -16,7 +16,7 @@ import {
   midweekMeetingOpeningPrayerLinkedState,
   userDataViewState,
 } from '@states/settings';
-import { sourcesFormattedState, sourcesState } from '@states/sources';
+import { sourcesState } from '@states/sources';
 import { SetStateAction, useCallback, useEffect, useState } from 'react';
 import { useAtomValue } from 'jotai';
 
@@ -24,7 +24,6 @@ const useMonthlyView = () => {
   const { t } = useAppTranslation();
 
   const monthNames = useAtomValue(monthNamesState);
-  const sourcesFormatted = useAtomValue(sourcesFormattedState);
   const sources = useAtomValue(sourcesState);
   const schedules = useAtomValue(schedulesState);
   const dataView = useAtomValue(userDataViewState);
