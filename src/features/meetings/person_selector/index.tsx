@@ -24,8 +24,6 @@ const PersonSelector = (props: PersonSelectorType) => {
     <Box
       sx={{
         flex: flexPersonSelector ? 1 : null,
-        // minWidth:0 prevents this flex child from growing beyond its column share
-        minWidth: 0,
         ...props.selectorBoxSx,
       }}
     >

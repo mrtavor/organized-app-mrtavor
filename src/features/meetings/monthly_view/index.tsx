@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import { addDays } from '@utils/date';
 import useAppTranslation from '@hooks/useAppTranslation';
 import { Button, MenuItem, Select, Typography } from '@components/index';
 import WeekBadge from './week_badge';
@@ -64,6 +65,7 @@ const MonthlyView = () => {
     handleAddCustomLCPart,
     openingPrayerLinked,
     closingPrayerLinked,
+    meetingWeekday,
   } = useMonthlyView();
 
   const { t } = useAppTranslation();
@@ -79,11 +81,6 @@ const MonthlyView = () => {
           border: '1px solid var(--accent-300)',
           borderRadius: 'var(--radius-xl)',
           backgroundColor: 'var(--white)',
-          // Force the floating label to always appear in the shrunk position so
-          // that empty columns match the visual height of filled columns.
-          '& .MuiFormLabel-root[data-shrink=false]': {
-            transform: 'translate(14px, -9px) scale(0.75)',
-          },
         }}
       >
         {/* --------------------------- MonhlyView Header -------------------------- */}
@@ -112,13 +109,14 @@ const MonthlyView = () => {
             })}
           </Select>
           {selectedWeeks.map((value, index) => {
+            const meetingDate = addDays(value, meetingWeekday);
             return (
               <WeekBadge
                 key={index}
                 week={value}
                 text={getWeekLocale(
-                  new Date(value).getDate(),
-                  thisYearMonths[selectedMonth]
+                  meetingDate.getDate(),
+                  thisYearMonths[meetingDate.getMonth()]
                 )}
               />
             );
