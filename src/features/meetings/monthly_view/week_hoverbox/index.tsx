@@ -20,6 +20,7 @@ const WeekHoverBox = (props: WeekHoverBoxType) => {
       sx={{
         flex: 1,
         minWidth: 0,
+        overflow: 'hidden',
         ...props.sx,
       }}
     >
