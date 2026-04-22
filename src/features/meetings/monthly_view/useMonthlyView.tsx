@@ -1,6 +1,6 @@
 import { AssignmentCode } from '@definition/assignment';
 import { Week } from '@definition/week_type';
-import { weeksInMonth } from '@utils/date';
+import { weeksInMonth, addDays } from '@utils/date';
 import useAppTranslation from '@hooks/useAppTranslation';
 import {
   sourcesCheckAYFExplainBeliefsAssignment,
@@ -14,6 +14,7 @@ import {
   midweekMeetingClassCountState,
   midweekMeetingClosingPrayerLinkedState,
   midweekMeetingOpeningPrayerLinkedState,
+  midweekMeetingWeekdayState,
   userDataViewState,
 } from '@states/settings';
 import { sourcesState } from '@states/sources';
@@ -28,6 +29,7 @@ const useMonthlyView = () => {
   const schedules = useAtomValue(schedulesState);
   const dataView = useAtomValue(userDataViewState);
   const classCount = useAtomValue(midweekMeetingClassCountState);
+  const meetingWeekday = useAtomValue(midweekMeetingWeekdayState);
   const lang = useAtomValue(JWLangState);
   const openingPrayerLinked = useAtomValue(
     midweekMeetingOpeningPrayerLinkedState
@@ -112,7 +114,9 @@ const useMonthlyView = () => {
     useState(null);
 
   // Derive which month indices (0-11) have published material for the current year.
-  // Uses the same filter as the weekly view: week_date_locale[lang] must have content.
+  // IMPORTANT: uses the actual meeting date (weekOf + congregation weekday offset)
+  // so that e.g. weekOf=2026/08/31 with Thursday meeting correctly shows under
+  // September (meeting date = Sept 3), not August. Mirrors schedulesGetMeetingDate.
   const availableMonthIndices = useMemo(() => {
     const set = new Set<number>();
     sources.forEach((s) => {
@@ -120,11 +124,12 @@ const useMonthlyView = () => {
         s.weekOf.startsWith(currentYear) &&
         s.midweek_meeting?.week_date_locale?.[lang]?.length > 0
       ) {
-        set.add(new Date(s.weekOf).getMonth());
+        const meetingDate = addDays(s.weekOf, meetingWeekday);
+        set.add(meetingDate.getMonth());
       }
     });
     return set;
-  }, [sources, currentYear, lang]);
+  }, [sources, currentYear, lang, meetingWeekday]);
 
   const thisYearMonths = monthNames;
 
@@ -211,20 +216,24 @@ const useMonthlyView = () => {
   }, [availableMonthIndices, selectedMonth]);
 
   useEffect(() => {
-    // Use the SAME filter as the weekly view (useMidweekContainer):
-    // a week is only shown if week_date_locale[lang] has content,
-    // meaning JW.org has published the meeting programme for that week.
+    // Use the actual meeting date (weekOf + congregation weekday) to group weeks
+    // by month — identical to schedulesGetMeetingDate logic used in the weekly view.
+    // weekOf is always Monday; the real meeting date may fall in the next month
+    // (e.g. weekOf=2026/08/31 + Thursday=4 → Sept 3 → month index 8 = September).
     const monthWeeks = sources
-      .filter(
-        (s) =>
-          s.weekOf.startsWith(currentYear) &&
-          new Date(s.weekOf).getMonth() === selectedMonth &&
-          s.midweek_meeting?.week_date_locale?.[lang]?.length > 0
-      )
+      .filter((s) => {
+        if (!s.midweek_meeting?.week_date_locale?.[lang]?.length) return false;
+        const meetingDate = addDays(s.weekOf, meetingWeekday);
+        const meetingYear = meetingDate.getFullYear().toString();
+        return (
+          meetingYear === currentYear &&
+          meetingDate.getMonth() === selectedMonth
+        );
+      })
       .map((s) => s.weekOf)
       .sort();
     setSelectedWeeks(monthWeeks);
-  }, [currentYear, selectedMonth, sources, lang]);
+  }, [currentYear, selectedMonth, sources, lang, meetingWeekday]);
 
 
 
