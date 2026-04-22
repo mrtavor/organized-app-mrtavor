@@ -111,24 +111,17 @@ const useMonthlyView = () => {
   const [addCustomModalWindowWeek, setAddCustomModalWindowWeek] =
     useState(null);
 
-  // Derive the last month for which source data is available from JW.ORG.
-  // Any month beyond this will be hidden from the month selector.
-  const lastAvailableMonth = useMemo(() => {
-    if (sources.length === 0) return new Date().getMonth();
-    const lastWeekOf = sources.reduce(
-      (max, s) => (s.weekOf > max ? s.weekOf : max),
-      sources[0].weekOf
-    );
-    return new Date(lastWeekOf).getMonth();
+  // Derive which month indices (0-11) have at least one available week.
+  // Used to hide months with no source data from the dropdown.
+  const availableMonthIndices = useMemo(() => {
+    const set = new Set<number>();
+    sources.forEach((s) => set.add(new Date(s.weekOf).getMonth()));
+    return set;
   }, [sources]);
 
-  const thisYearMonths = useMemo(
-    () => monthNames.slice(0, lastAvailableMonth + 1),
-    [monthNames, lastAvailableMonth]
-  );
+  const thisYearMonths = monthNames;
 
   const monthName = thisYearMonths[selectedMonth];
-
 
   const getWeekLocale = (date, monthName) => {
     return t('tr_longDateNoYearLocale', {
@@ -201,19 +194,24 @@ const useMonthlyView = () => {
     });
   };
 
-  // Clamp selectedMonth if it's now beyond the last available month
-  // (can happen when source data resets or the user had a future month open).
+  // Clamp selectedMonth to an available month when the selection has no data.
+  // Jumps to the highest available month index.
   useEffect(() => {
-    if (selectedMonth > lastAvailableMonth) {
-      setSelectedMonth(lastAvailableMonth);
+    if (availableMonthIndices.size > 0 && !availableMonthIndices.has(selectedMonth)) {
+      const lastAvailable = Math.max(...Array.from(availableMonthIndices));
+      setSelectedMonth(lastAvailable);
     }
-  }, [lastAvailableMonth, selectedMonth]);
+  }, [availableMonthIndices, selectedMonth]);
 
   useEffect(() => {
-    setSelectedWeeks(
-      getWeeksByMonthAndYear(parseInt(currentYear), selectedMonth)
+    // Only show weeks that have source data — mirrors weekly view behaviour.
+    const allWeeks = getWeeksByMonthAndYear(parseInt(currentYear), selectedMonth);
+    const availableWeeks = allWeeks.filter((week) =>
+      sources.some((s) => s.weekOf === week)
     );
-  }, [currentYear, getWeeksByMonthAndYear, selectedMonth]);
+    setSelectedWeeks(availableWeeks);
+  }, [currentYear, getWeeksByMonthAndYear, selectedMonth, sources]);
+
 
 
   // Reset all parallel state arrays when the selected month changes and
@@ -418,6 +416,7 @@ const useMonthlyView = () => {
     // General Settings
     currentYear,
     thisYearMonths,
+    availableMonthIndices,
     openingPrayerLinked,
     closingPrayerLinked,
     showDoublePerson,
