@@ -422,10 +422,6 @@ const useMonthlyView = () => {
     closingPrayerLinked,
     showDoublePerson,
 
-    // Availability helper used by WeekBadge to guard autofill
-    isWeekAvailable: (weekOf: string) =>
-      sources.some((s) => s.weekOf === weekOf),
-
     // Selected Month & Week Information
     monthName,
     selectedMonth,
