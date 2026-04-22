@@ -111,17 +111,20 @@ const useMonthlyView = () => {
   const [addCustomModalWindowWeek, setAddCustomModalWindowWeek] =
     useState(null);
 
-  // Derive which month indices (0-11) have at least one available week
-  // in the CURRENT year. Used to hide months with no source data from the dropdown.
+  // Derive which month indices (0-11) have published material for the current year.
+  // Uses the same filter as the weekly view: week_date_locale[lang] must have content.
   const availableMonthIndices = useMemo(() => {
     const set = new Set<number>();
     sources.forEach((s) => {
-      if (s.weekOf.startsWith(currentYear)) {
+      if (
+        s.weekOf.startsWith(currentYear) &&
+        s.midweek_meeting?.week_date_locale?.[lang]?.length > 0
+      ) {
         set.add(new Date(s.weekOf).getMonth());
       }
     });
     return set;
-  }, [sources, currentYear]);
+  }, [sources, currentYear, lang]);
 
   const thisYearMonths = monthNames;
 
@@ -208,18 +211,20 @@ const useMonthlyView = () => {
   }, [availableMonthIndices, selectedMonth]);
 
   useEffect(() => {
-    // Use the actual weekOf values from sourcesState for this month.
-    // JW.org weeks may not start on Mondays, so matching against
-    // weeksInMonth() (which generates Mondays) would fail to find them.
+    // Use the SAME filter as the weekly view (useMidweekContainer):
+    // a week is only shown if week_date_locale[lang] has content,
+    // meaning JW.org has published the meeting programme for that week.
     const monthWeeks = sources
-      .filter((s) => {
-        if (!s.weekOf.startsWith(currentYear)) return false;
-        return new Date(s.weekOf).getMonth() === selectedMonth;
-      })
+      .filter(
+        (s) =>
+          s.weekOf.startsWith(currentYear) &&
+          new Date(s.weekOf).getMonth() === selectedMonth &&
+          s.midweek_meeting?.week_date_locale?.[lang]?.length > 0
+      )
       .map((s) => s.weekOf)
       .sort();
     setSelectedWeeks(monthWeeks);
-  }, [currentYear, selectedMonth, sources]);
+  }, [currentYear, selectedMonth, sources, lang]);
 
 
 
