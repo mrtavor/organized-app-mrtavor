@@ -111,13 +111,17 @@ const useMonthlyView = () => {
   const [addCustomModalWindowWeek, setAddCustomModalWindowWeek] =
     useState(null);
 
-  // Derive which month indices (0-11) have at least one available week.
-  // Used to hide months with no source data from the dropdown.
+  // Derive which month indices (0-11) have at least one available week
+  // in the CURRENT year. Used to hide months with no source data from the dropdown.
   const availableMonthIndices = useMemo(() => {
     const set = new Set<number>();
-    sources.forEach((s) => set.add(new Date(s.weekOf).getMonth()));
+    sources.forEach((s) => {
+      if (s.weekOf.startsWith(currentYear)) {
+        set.add(new Date(s.weekOf).getMonth());
+      }
+    });
     return set;
-  }, [sources]);
+  }, [sources, currentYear]);
 
   const thisYearMonths = monthNames;
 
