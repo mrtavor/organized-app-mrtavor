@@ -208,13 +208,18 @@ const useMonthlyView = () => {
   }, [availableMonthIndices, selectedMonth]);
 
   useEffect(() => {
-    // Only show weeks that have source data — mirrors weekly view behaviour.
-    const allWeeks = getWeeksByMonthAndYear(parseInt(currentYear), selectedMonth);
-    const availableWeeks = allWeeks.filter((week) =>
-      sources.some((s) => s.weekOf === week)
-    );
-    setSelectedWeeks(availableWeeks);
-  }, [currentYear, getWeeksByMonthAndYear, selectedMonth, sources]);
+    // Use the actual weekOf values from sourcesState for this month.
+    // JW.org weeks may not start on Mondays, so matching against
+    // weeksInMonth() (which generates Mondays) would fail to find them.
+    const monthWeeks = sources
+      .filter((s) => {
+        if (!s.weekOf.startsWith(currentYear)) return false;
+        return new Date(s.weekOf).getMonth() === selectedMonth;
+      })
+      .map((s) => s.weekOf)
+      .sort();
+    setSelectedWeeks(monthWeeks);
+  }, [currentYear, selectedMonth, sources]);
 
 
 

@@ -79,6 +79,11 @@ const MonthlyView = () => {
           border: '1px solid var(--accent-300)',
           borderRadius: 'var(--radius-xl)',
           backgroundColor: 'var(--white)',
+          // Force the floating label to always appear in the shrunk position so
+          // that empty columns match the visual height of filled columns.
+          '& .MuiFormLabel-root[data-shrink=false]': {
+            transform: 'translate(14px, -9px) scale(0.75)',
+          },
         }}
       >
         {/* --------------------------- MonhlyView Header -------------------------- */}
