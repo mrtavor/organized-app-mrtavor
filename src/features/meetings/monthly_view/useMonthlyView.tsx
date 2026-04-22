@@ -1,6 +1,6 @@
 import { AssignmentCode } from '@definition/assignment';
 import { Week } from '@definition/week_type';
-import { weeksInMonth, addDays } from '@utils/date';
+import { addDays } from '@utils/date';
 import useAppTranslation from '@hooks/useAppTranslation';
 import {
   sourcesCheckAYFExplainBeliefsAssignment,
@@ -18,7 +18,7 @@ import {
   userDataViewState,
 } from '@states/settings';
 import { sourcesState } from '@states/sources';
-import { SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { SetStateAction, useEffect, useMemo, useState } from 'react';
 import { useAtomValue } from 'jotai';
 
 const useMonthlyView = () => {
@@ -38,20 +38,10 @@ const useMonthlyView = () => {
     midweekMeetingClosingPrayerLinkedState
   );
 
-  const getWeeksByMonthAndYear = useCallback(
-    (year: number, month: number) => {
-      const monthStr = `${year}/${String(month + 1).padStart(2, '0')}`;
-      return weeksInMonth(monthStr);
-    },
-    []
-  );
-
   const currentYear = new Date().getFullYear().toString();
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedWeeks, setSelectedWeeks] = useState(
-    getWeeksByMonthAndYear(parseInt(currentYear), selectedMonth)
-  );
+  const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]);
 
   const [weeksTypes, setWeeksTypes] = useState(
     Array(selectedWeeks.length).fill(Week.NORMAL)
@@ -206,27 +196,21 @@ const useMonthlyView = () => {
     });
   };
 
-  // Clamp selectedMonth to an available month when the selection has no data.
-  // Jumps to the highest available month index.
+  // Clamp selectedMonth to an available month when the current selection has no data.
+  // This prevents rendering an empty month and jumps to the closest available month.
   useEffect(() => {
     if (availableMonthIndices.size > 0 && !availableMonthIndices.has(selectedMonth)) {
-      const lastAvailable = Math.max(...Array.from(availableMonthIndices));
-      setSelectedMonth(lastAvailable);
+      setSelectedMonth(Math.max(...Array.from(availableMonthIndices)));
     }
   }, [availableMonthIndices, selectedMonth]);
 
   useEffect(() => {
-    // Use the actual meeting date (weekOf + congregation weekday) to group weeks
-    // by month — identical to schedulesGetMeetingDate logic used in the weekly view.
-    // weekOf is always Monday; the real meeting date may fall in the next month
-    // (e.g. weekOf=2026/08/31 + Thursday=4 → Sept 3 → month index 8 = September).
     const monthWeeks = sources
       .filter((s) => {
         if (!s.midweek_meeting?.week_date_locale?.[lang]?.length) return false;
         const meetingDate = addDays(s.weekOf, meetingWeekday);
-        const meetingYear = meetingDate.getFullYear().toString();
         return (
-          meetingYear === currentYear &&
+          meetingDate.getFullYear().toString() === currentYear &&
           meetingDate.getMonth() === selectedMonth
         );
       })
@@ -234,8 +218,6 @@ const useMonthlyView = () => {
       .sort();
     setSelectedWeeks(monthWeeks);
   }, [currentYear, selectedMonth, sources, lang, meetingWeekday]);
-
-
 
   // Reset all parallel state arrays when the selected month changes and
   // selectedWeeks grows or shrinks. Without this, out-of-bounds indices
