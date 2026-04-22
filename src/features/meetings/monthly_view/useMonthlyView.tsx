@@ -196,11 +196,11 @@ const useMonthlyView = () => {
     selectedWeeks.forEach((value, index) => {
       const schedule = schedules.find((record) => record.weekOf === value);
 
-      const weekType = schedule.midweek_meeting.week_type.find(
+      const weekType = schedule?.midweek_meeting?.week_type?.find(
         (record) => record.type === dataView
       );
 
-      changeValueInArrayState(setWeeksTypes, index, weekType);
+      changeValueInArrayState(setWeeksTypes, index, weekType || Week.NORMAL);
     });
   }, [selectedWeeks, schedules, dataView]);
 
@@ -261,11 +261,11 @@ const useMonthlyView = () => {
       const source = sources.find((record) => record.weekOf === value);
 
       const lcCountOverride =
-        source.midweek_meeting.lc_count.override.find(
+        source?.midweek_meeting?.lc_count?.override?.find(
           (record) => record.type === dataView
         )?.value || 0;
 
-      const lcCount = source.midweek_meeting.lc_count.default[lang];
+      const lcCount = source?.midweek_meeting?.lc_count?.default?.[lang] || 0;
 
       changeValueInArrayState(setLcCount, index, lcCount);
 
@@ -282,14 +282,14 @@ const useMonthlyView = () => {
       );
 
       lcNoAssignPartsSetters.forEach((setter, setterIndex) => {
-        const lcSrcPart = source.midweek_meeting[`lc_part${setterIndex + 1}`];
+        const lcSrcPart = source?.midweek_meeting?.[`lc_part${setterIndex + 1}`];
 
-        const lcSrcOverride = lcSrcPart.title.override.find(
+        const lcSrcOverride = lcSrcPart?.title?.override?.find(
           (record) => record.type === dataView
         )?.value;
 
         const lcSrcDefault =
-          source.midweek_meeting[`lc_part${setterIndex + 1}`].title.default[
+          source?.midweek_meeting?.[`lc_part${setterIndex + 1}`]?.title?.default?.[
           lang
           ];
 
@@ -310,7 +310,7 @@ const useMonthlyView = () => {
       });
 
       const lc3Src =
-        source.midweek_meeting.lc_part3.title.find(
+        source?.midweek_meeting?.lc_part3?.title?.find(
           (record) => record.type === dataView
         )?.value || '';
 

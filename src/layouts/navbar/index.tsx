@@ -12,6 +12,7 @@ import {
 import {
   Children,
   ReactElement,
+  ReactNode,
   cloneElement,
   isValidElement,
   useMemo,
@@ -99,7 +100,9 @@ const NavBar = ({ isSupported }: NavBarType) => {
   const navBarButtons = useMemo(() => {
     if (!navBarOptions.buttons) return null;
 
-    const buttonsEl = navBarOptions.buttons as ReactElement<any>;
+    const buttonsEl = navBarOptions.buttons as ReactElement<{
+      children?: ReactNode;
+    }>;
     const children = Children.toArray(
       buttonsEl.props?.children || navBarOptions.buttons
     );
@@ -118,13 +121,16 @@ const NavBar = ({ isSupported }: NavBarType) => {
 
     const newChildren = children.map((child, index) => {
       if (index === lastIndex && isValidElement(child)) {
-        const childEl = child as ReactElement<any>;
+        const childEl = child as ReactElement<{
+          color?: string;
+          variant?: string;
+        }>;
         const { color } = childEl.props;
         const isRed = color === 'red';
         const isYellow = color === 'yellow';
 
         if (!isRed && !isYellow) {
-          return cloneElement(childEl, { main: true });
+          return cloneElement(childEl, { variant: 'main' });
         }
       }
       return child;
