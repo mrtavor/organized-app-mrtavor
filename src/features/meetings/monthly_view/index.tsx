@@ -30,6 +30,7 @@ const MonthlyView = () => {
     currentYear,
     selectedMonth,
     thisYearMonths,
+    availableMonthIndices,
     setSelectedMonth,
     classCount,
     showDoublePerson,
@@ -97,6 +98,7 @@ const MonthlyView = () => {
             }
           >
             {thisYearMonths?.map((value, index) => {
+              if (!availableMonthIndices.has(index)) return null;
               return (
                 <MenuItem value={index} key={index}>
                   {`${value} ${currentYear}`}

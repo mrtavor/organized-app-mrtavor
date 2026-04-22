@@ -4,34 +4,9 @@ import MeetingPart from '@features/meetings/meeting_part';
 import Tooltip from '@components/tooltip';
 import { useAtomValue } from 'jotai';
 import { userDataViewState } from '@states/settings';
-import { sourcesState } from '@states/sources';
-import Typography from '@components/typography';
-import { useAppTranslation } from '@hooks/index';
 
 const WeekHoverBox = (props: WeekHoverBoxType) => {
-  const { t } = useAppTranslation();
   const dataView = useAtomValue(userDataViewState);
-  const sources = useAtomValue(sourcesState);
-
-  // A week is "available" if a source record exists for it
-  const isWeekAvailable =
-    !props.week || sources.some((s) => s.weekOf === props.week);
-
-  const tooltipTitle = isWeekAvailable ? (
-    <MeetingPart
-      week={props.week}
-      type={props.type}
-      color={'var(--black)'}
-      dataView={dataView}
-    />
-  ) : (
-    <Typography className="body-small-regular" color="var(--grey-400)">
-      {t('tr_meetingContentPending', {
-        defaultValue:
-          "Content pending — this week's material isn't available on JW.ORG yet",
-      })}
-    </Typography>
-  );
 
   return (
     <Tooltip
@@ -57,7 +32,14 @@ const WeekHoverBox = (props: WeekHoverBoxType) => {
         },
         popper: { style: { zIndex: 2 } },
       }}
-      title={tooltipTitle}
+      title={
+        <MeetingPart
+          week={props.week}
+          type={props.type}
+          color={'var(--black)'}
+          dataView={dataView}
+        />
+      }
     >
       {props.children as ReactElement}
     </Tooltip>
