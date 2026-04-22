@@ -17,7 +17,7 @@ import {
   userDataViewState,
 } from '@states/settings';
 import { sourcesState } from '@states/sources';
-import { SetStateAction, useCallback, useEffect, useState } from 'react';
+import { SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAtomValue } from 'jotai';
 
 const useMonthlyView = () => {
@@ -111,9 +111,24 @@ const useMonthlyView = () => {
   const [addCustomModalWindowWeek, setAddCustomModalWindowWeek] =
     useState(null);
 
-  const thisYearMonths = monthNames;
+  // Derive the last month for which source data is available from JW.ORG.
+  // Any month beyond this will be hidden from the month selector.
+  const lastAvailableMonth = useMemo(() => {
+    if (sources.length === 0) return new Date().getMonth();
+    const lastWeekOf = sources.reduce(
+      (max, s) => (s.weekOf > max ? s.weekOf : max),
+      sources[0].weekOf
+    );
+    return new Date(lastWeekOf).getMonth();
+  }, [sources]);
+
+  const thisYearMonths = useMemo(
+    () => monthNames.slice(0, lastAvailableMonth + 1),
+    [monthNames, lastAvailableMonth]
+  );
 
   const monthName = thisYearMonths[selectedMonth];
+
 
   const getWeekLocale = (date, monthName) => {
     return t('tr_longDateNoYearLocale', {
@@ -186,11 +201,20 @@ const useMonthlyView = () => {
     });
   };
 
+  // Clamp selectedMonth if it's now beyond the last available month
+  // (can happen when source data resets or the user had a future month open).
+  useEffect(() => {
+    if (selectedMonth > lastAvailableMonth) {
+      setSelectedMonth(lastAvailableMonth);
+    }
+  }, [lastAvailableMonth, selectedMonth]);
+
   useEffect(() => {
     setSelectedWeeks(
       getWeeksByMonthAndYear(parseInt(currentYear), selectedMonth)
     );
   }, [currentYear, getWeeksByMonthAndYear, selectedMonth]);
+
 
   // Reset all parallel state arrays when the selected month changes and
   // selectedWeeks grows or shrinks. Without this, out-of-bounds indices
@@ -397,6 +421,10 @@ const useMonthlyView = () => {
     openingPrayerLinked,
     closingPrayerLinked,
     showDoublePerson,
+
+    // Availability helper used by WeekBadge to guard autofill
+    isWeekAvailable: (weekOf: string) =>
+      sources.some((s) => s.weekOf === weekOf),
 
     // Selected Month & Week Information
     monthName,
