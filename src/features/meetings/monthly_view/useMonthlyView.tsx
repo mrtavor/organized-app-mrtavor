@@ -192,6 +192,32 @@ const useMonthlyView = () => {
     );
   }, [currentYear, getWeeksByMonthAndYear, selectedMonth]);
 
+  // Reset all parallel state arrays when the selected month changes and
+  // selectedWeeks grows or shrinks. Without this, out-of-bounds indices
+  // cause EmptyAssignment to render instead of PersonSelector for the
+  // extra/missing weeks (the stale-array-size bug).
+  useEffect(() => {
+    const len = selectedWeeks.length;
+    setWeeksTypes(Array(len).fill(Week.NORMAL));
+    setAyfCount(Array(len).fill(1));
+    setAyfParts1(Array(len).fill(null));
+    setAyfParts2(Array(len).fill(null));
+    setAyfParts3(Array(len).fill(null));
+    setAyfParts4(Array(len).fill(null));
+    setIsTalkAYFParts1(Array(len).fill(false));
+    setIsTalkAYFParts2(Array(len).fill(false));
+    setIsTalkAYFParts3(Array(len).fill(false));
+    setIsTalkAYFParts4(Array(len).fill(false));
+    setLcCount(Array(len).fill(1));
+    setCustomPartEnabled(Array(len).fill(true));
+    setHasCustomPart(Array(len).fill(false));
+    setLcNoAssignParts1(Array(len).fill(false));
+    setLcNoAssignParts2(Array(len).fill(false));
+    setLcNoAssignParts3(Array(len).fill(false));
+    setIsOverwriteLCParts1(Array(len).fill(false));
+    setIsOverwriteLCParts2(Array(len).fill(false));
+  }, [selectedWeeks]);
+
   useEffect(() => {
     selectedWeeks.forEach((value, index) => {
       const schedule = schedules.find((record) => record.weekOf === value);
