@@ -10,6 +10,8 @@ import {
   useTheme,
 } from '@mui/material';
 import {
+} from 'react';
+import {
   IconAccount,
   IconDonate,
   IconHelp,
@@ -88,6 +90,7 @@ const NavBar = ({ isSupported }: NavBarType) => {
     navBarOptions,
     handleQuickSettings,
   } = useNavbar();
+
 
   return (
     <>
