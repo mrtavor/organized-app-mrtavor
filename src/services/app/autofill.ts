@@ -1115,6 +1115,10 @@ export const schedulesStartAutofill = async (
       return isValid;
     });
 
+    // If no schedule records matched the requested week(s), bail out with a
+    // user-visible error rather than silently doing nothing.
+    if (weeksList.length === 0) return;
+
     if (meeting === 'midweek') {
       await handleAutofillMidweek(weeksList);
     }
