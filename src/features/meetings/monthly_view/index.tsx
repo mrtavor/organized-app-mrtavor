@@ -63,6 +63,7 @@ const MonthlyView = () => {
     handleAddCustomLCPart,
     openingPrayerLinked,
     closingPrayerLinked,
+    isWeekAvailable,
   } = useMonthlyView();
 
   const { t } = useAppTranslation();
@@ -109,6 +110,7 @@ const MonthlyView = () => {
               <WeekBadge
                 key={index}
                 week={value}
+                isWeekAvailable={isWeekAvailable(value)}
                 text={getWeekLocale(
                   new Date(value).getDate(),
                   thisYearMonths[selectedMonth]

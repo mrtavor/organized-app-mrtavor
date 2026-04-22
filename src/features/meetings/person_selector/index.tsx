@@ -24,6 +24,9 @@ const PersonSelector = (props: PersonSelectorType) => {
     <Box
       sx={{
         flex: flexPersonSelector ? 1 : null,
+        // Prevent helper text from blowing out the column width in monthly view
+        overflow: 'hidden',
+        minWidth: 0,
         ...props.selectorBoxSx,
       }}
     >

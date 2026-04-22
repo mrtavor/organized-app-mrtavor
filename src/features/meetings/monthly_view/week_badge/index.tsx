@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, MouseEvent } from 'react';
 import Typography from '@components/typography';
 import { Box, IconButton } from '@mui/material';
 import { WeekBadgeType } from './index.types';
@@ -7,14 +7,32 @@ import IconLoading from '@components/icon_loading';
 import { displaySnackNotification } from '@services/states/app';
 import { getMessageByCode } from '@services/i18n/translation';
 import { schedulesStartAutofill } from '@services/app/autofill';
+import { useAppTranslation } from '@hooks/index';
 
 const WeekBadge = (props: WeekBadgeType) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const { t } = useAppTranslation();
 
-  const handleAutofill = async (e: React.MouseEvent) => {
+  const handleAutofill = async (e: MouseEvent) => {
     e.stopPropagation();
     if (!props.week) return;
-    
+
+    // Guard: show informative snackbar if the week's source data isn't
+    // available on JW.ORG yet instead of silently no-oping.
+    if (props.isWeekAvailable === false) {
+      displaySnackNotification({
+        header: t('tr_meetingContentPending', {
+          defaultValue: 'Meeting content pending',
+        }),
+        message: t('tr_meetingContentPendingDesc', {
+          defaultValue:
+            "This week's meeting programme hasn't been released on JW.ORG yet. Try again once it's available.",
+        }),
+        severity: 'success',
+      });
+      return;
+    }
+
     try {
       setIsProcessing(true);
       await schedulesStartAutofill(props.week, props.week, 'midweek');
