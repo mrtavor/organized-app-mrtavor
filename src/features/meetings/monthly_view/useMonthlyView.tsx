@@ -443,6 +443,7 @@ const useMonthlyView = () => {
     openingPrayerLinked,
     closingPrayerLinked,
     showDoublePerson,
+    meetingWeekday,
 
     // Selected Month & Week Information
     monthName,
