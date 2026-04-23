@@ -92,6 +92,7 @@ const NavBar = ({ isSupported }: NavBarType) => {
   } = useNavbar();
 
 
+
   return (
     <>
       <AppBar
