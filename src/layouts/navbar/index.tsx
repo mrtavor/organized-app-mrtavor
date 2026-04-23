@@ -10,6 +10,14 @@ import {
   useTheme,
 } from '@mui/material';
 import {
+  Children,
+  ReactElement,
+  ReactNode,
+  cloneElement,
+  isValidElement,
+  useMemo,
+} from 'react';
+import {
   IconAccount,
   IconDonate,
   IconHelp,
@@ -88,6 +96,52 @@ const NavBar = ({ isSupported }: NavBarType) => {
     navBarOptions,
     handleQuickSettings,
   } = useNavbar();
+
+  const navBarButtons = useMemo(() => {
+    if (!navBarOptions.buttons) return null;
+
+    const buttonsEl = navBarOptions.buttons as ReactElement<{
+      children?: ReactNode;
+    }>;
+    const children = Children.toArray(
+      buttonsEl.props?.children || navBarOptions.buttons
+    );
+
+    if (children.length === 0) return navBarOptions.buttons;
+
+    let lastIndex = -1;
+    for (let i = children.length - 1; i >= 0; i--) {
+      if (isValidElement(children[i])) {
+        lastIndex = i;
+        break;
+      }
+    }
+
+    if (lastIndex === -1) return navBarOptions.buttons;
+
+    const newChildren = children.map((child, index) => {
+      if (index === lastIndex && isValidElement(child)) {
+        const childEl = child as ReactElement<{
+          color?: string;
+          variant?: string;
+        }>;
+        const { color } = childEl.props;
+        const isRed = color === 'red';
+        const isYellow = color === 'yellow';
+
+        if (!isRed && !isYellow) {
+          return cloneElement(childEl, { variant: 'main' });
+        }
+      }
+      return child;
+    });
+
+    if (buttonsEl.props?.children) {
+      return cloneElement(buttonsEl, undefined, newChildren);
+    }
+
+    return <>{newChildren}</>;
+  }, [navBarOptions.buttons]);
 
   return (
     <>
@@ -533,7 +587,7 @@ const NavBar = ({ isSupported }: NavBarType) => {
                       borderRadius: 'var(--radius-xl)',
                     }}
                   >
-                    {navBarOptions.buttons}
+                    {navBarButtons}
                   </Box>
                 )}
               </>
@@ -541,8 +595,8 @@ const NavBar = ({ isSupported }: NavBarType) => {
           </Container>
         </Toolbar>
       </AppBar>
-      {navBarOptions.buttons && !tablet688Up && (
-        <BottomMenu buttons={navBarOptions.buttons} />
+      {navBarButtons && !tablet688Up && (
+        <BottomMenu buttons={navBarButtons} />
       )}
     </>
   );

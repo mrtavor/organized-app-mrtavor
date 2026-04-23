@@ -1,5 +1,6 @@
 import { AssignmentCode } from '@definition/assignment';
 import { Week } from '@definition/week_type';
+import { addDays } from '@utils/date';
 import useAppTranslation from '@hooks/useAppTranslation';
 import {
   sourcesCheckAYFExplainBeliefsAssignment,
@@ -13,21 +14,22 @@ import {
   midweekMeetingClassCountState,
   midweekMeetingClosingPrayerLinkedState,
   midweekMeetingOpeningPrayerLinkedState,
+  midweekMeetingWeekdayState,
   userDataViewState,
 } from '@states/settings';
-import { sourcesFormattedState, sourcesState } from '@states/sources';
-import { SetStateAction, useCallback, useEffect, useState } from 'react';
+import { sourcesState } from '@states/sources';
+import { SetStateAction, useEffect, useMemo, useState } from 'react';
 import { useAtomValue } from 'jotai';
 
 const useMonthlyView = () => {
   const { t } = useAppTranslation();
 
   const monthNames = useAtomValue(monthNamesState);
-  const sourcesFormatted = useAtomValue(sourcesFormattedState);
   const sources = useAtomValue(sourcesState);
   const schedules = useAtomValue(schedulesState);
   const dataView = useAtomValue(userDataViewState);
   const classCount = useAtomValue(midweekMeetingClassCountState);
+  const meetingWeekday = useAtomValue(midweekMeetingWeekdayState);
   const lang = useAtomValue(JWLangState);
   const openingPrayerLinked = useAtomValue(
     midweekMeetingOpeningPrayerLinkedState
@@ -36,27 +38,10 @@ const useMonthlyView = () => {
     midweekMeetingClosingPrayerLinkedState
   );
 
-  const getWeeksByMonthAndYear = useCallback(
-    (year: number, month: number) => {
-      let weeks = [];
-      sourcesFormatted.forEach((srcYear) => {
-        if (srcYear.value == year) {
-          weeks = srcYear.months.find(
-            (formattedMonth) => formattedMonth.value == month
-          ).weeks;
-        }
-      });
-      return weeks;
-    },
-    [sourcesFormatted]
-  );
-
   const currentYear = new Date().getFullYear().toString();
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedWeeks, setSelectedWeeks] = useState(
-    getWeeksByMonthAndYear(parseInt(currentYear), selectedMonth)
-  );
+  const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]);
 
   const [weeksTypes, setWeeksTypes] = useState(
     Array(selectedWeeks.length).fill(Week.NORMAL)
@@ -118,10 +103,25 @@ const useMonthlyView = () => {
   const [addCustomModalWindowWeek, setAddCustomModalWindowWeek] =
     useState(null);
 
-  const thisYearMonths = sourcesFormatted
-    .find((year) => year.value.toString() === currentYear)
-    .months.toReversed()
-    .map((month) => monthNames[month.value]);
+  // Derive which month indices (0-11) have published material for the current year.
+  // IMPORTANT: uses the actual meeting date (weekOf + congregation weekday offset)
+  // so that e.g. weekOf=2026/08/31 with Thursday meeting correctly shows under
+  // September (meeting date = Sept 3), not August. Mirrors schedulesGetMeetingDate.
+  const availableMonthIndices = useMemo(() => {
+    const set = new Set<number>();
+    sources.forEach((s) => {
+      if (
+        s.weekOf.startsWith(currentYear) &&
+        s.midweek_meeting?.week_date_locale?.[lang]?.length > 0
+      ) {
+        const meetingDate = addDays(s.weekOf, meetingWeekday);
+        set.add(meetingDate.getMonth());
+      }
+    });
+    return set;
+  }, [sources, currentYear, lang, meetingWeekday]);
+
+  const thisYearMonths = monthNames;
 
   const monthName = thisYearMonths[selectedMonth];
 
@@ -196,21 +196,64 @@ const useMonthlyView = () => {
     });
   };
 
+  // Clamp selectedMonth to an available month when the current selection has no data.
+  // This prevents rendering an empty month and jumps to the closest available month.
   useEffect(() => {
-    setSelectedWeeks(
-      getWeeksByMonthAndYear(parseInt(currentYear), selectedMonth)
-    );
-  }, [currentYear, getWeeksByMonthAndYear, selectedMonth]);
+    if (availableMonthIndices.size > 0 && !availableMonthIndices.has(selectedMonth)) {
+      setSelectedMonth(Math.max(...Array.from(availableMonthIndices)));
+    }
+  }, [availableMonthIndices, selectedMonth]);
+
+  useEffect(() => {
+    const monthWeeks = sources
+      .filter((s) => {
+        if (!s.midweek_meeting?.week_date_locale?.[lang]?.length) return false;
+        const meetingDate = addDays(s.weekOf, meetingWeekday);
+        return (
+          meetingDate.getFullYear().toString() === currentYear &&
+          meetingDate.getMonth() === selectedMonth
+        );
+      })
+      .map((s) => s.weekOf)
+      .sort();
+    setSelectedWeeks(monthWeeks);
+  }, [currentYear, selectedMonth, sources, lang, meetingWeekday]);
+
+  // Reset all parallel state arrays when the selected month changes and
+  // selectedWeeks grows or shrinks. Without this, out-of-bounds indices
+  // cause EmptyAssignment to render instead of PersonSelector for the
+  // extra/missing weeks (the stale-array-size bug).
+  useEffect(() => {
+    const len = selectedWeeks.length;
+    setWeeksTypes(Array(len).fill(Week.NORMAL));
+    setAyfCount(Array(len).fill(1));
+    setAyfParts1(Array(len).fill(null));
+    setAyfParts2(Array(len).fill(null));
+    setAyfParts3(Array(len).fill(null));
+    setAyfParts4(Array(len).fill(null));
+    setIsTalkAYFParts1(Array(len).fill(false));
+    setIsTalkAYFParts2(Array(len).fill(false));
+    setIsTalkAYFParts3(Array(len).fill(false));
+    setIsTalkAYFParts4(Array(len).fill(false));
+    setLcCount(Array(len).fill(1));
+    setCustomPartEnabled(Array(len).fill(true));
+    setHasCustomPart(Array(len).fill(false));
+    setLcNoAssignParts1(Array(len).fill(false));
+    setLcNoAssignParts2(Array(len).fill(false));
+    setLcNoAssignParts3(Array(len).fill(false));
+    setIsOverwriteLCParts1(Array(len).fill(false));
+    setIsOverwriteLCParts2(Array(len).fill(false));
+  }, [selectedWeeks]);
 
   useEffect(() => {
     selectedWeeks.forEach((value, index) => {
       const schedule = schedules.find((record) => record.weekOf === value);
 
-      const weekType = schedule.midweek_meeting.week_type.find(
+      const weekType = schedule?.midweek_meeting?.week_type?.find(
         (record) => record.type === dataView
       );
 
-      changeValueInArrayState(setWeeksTypes, index, weekType);
+      changeValueInArrayState(setWeeksTypes, index, weekType || Week.NORMAL);
     });
   }, [selectedWeeks, schedules, dataView]);
 
@@ -235,19 +278,24 @@ const useMonthlyView = () => {
       changeValueInArrayState(
         setAyfCount,
         index,
-        source.midweek_meeting.ayf_count[lang]
+        source?.midweek_meeting?.ayf_count[lang] || 3
       );
 
       ayfPartsSetters.forEach((setter, setterIndex) => {
-        const ayfPart = source.midweek_meeting[`ayf_part${setterIndex + 1}`];
+        const ayfPart = source?.midweek_meeting[`ayf_part${setterIndex + 1}`];
 
-        changeValueInArrayState(setter, index, ayfPart.type[lang]);
+        let partType = ayfPart?.type[lang];
+        if (!partType || partType === 0) {
+          partType = AssignmentCode.MM_StartingConversation;
+        }
 
-        if (ayfPart.type[lang] === AssignmentCode.MM_ExplainingBeliefs) {
+        changeValueInArrayState(setter, index, partType);
+
+        if (partType === AssignmentCode.MM_ExplainingBeliefs) {
           changeValueInArrayState(
             isTalkAYFPartsSetters[setterIndex],
             index,
-            sourcesCheckAYFExplainBeliefsAssignment(ayfPart.src[lang], lang)
+            sourcesCheckAYFExplainBeliefsAssignment(ayfPart?.src[lang], lang)
           );
         }
       });
@@ -266,11 +314,11 @@ const useMonthlyView = () => {
       const source = sources.find((record) => record.weekOf === value);
 
       const lcCountOverride =
-        source.midweek_meeting.lc_count.override.find(
+        source?.midweek_meeting?.lc_count?.override?.find(
           (record) => record.type === dataView
         )?.value || 0;
 
-      const lcCount = source.midweek_meeting.lc_count.default[lang];
+      const lcCount = source?.midweek_meeting?.lc_count?.default?.[lang] || 0;
 
       changeValueInArrayState(setLcCount, index, lcCount);
 
@@ -287,14 +335,14 @@ const useMonthlyView = () => {
       );
 
       lcNoAssignPartsSetters.forEach((setter, setterIndex) => {
-        const lcSrcPart = source.midweek_meeting[`lc_part${setterIndex + 1}`];
+        const lcSrcPart = source?.midweek_meeting?.[`lc_part${setterIndex + 1}`];
 
-        const lcSrcOverride = lcSrcPart.title.override.find(
+        const lcSrcOverride = lcSrcPart?.title?.override?.find(
           (record) => record.type === dataView
         )?.value;
 
         const lcSrcDefault =
-          source.midweek_meeting[`lc_part${setterIndex + 1}`].title.default[
+          source?.midweek_meeting?.[`lc_part${setterIndex + 1}`]?.title?.default?.[
           lang
           ];
 
@@ -315,7 +363,7 @@ const useMonthlyView = () => {
       });
 
       const lc3Src =
-        source.midweek_meeting.lc_part3.title.find(
+        source?.midweek_meeting?.lc_part3?.title?.find(
           (record) => record.type === dataView
         )?.value || '';
 
@@ -373,9 +421,11 @@ const useMonthlyView = () => {
     // General Settings
     currentYear,
     thisYearMonths,
+    availableMonthIndices,
     openingPrayerLinked,
     closingPrayerLinked,
     showDoublePerson,
+    meetingWeekday,
 
     // Selected Month & Week Information
     monthName,
