@@ -7,8 +7,11 @@ import IconLoading from '@components/icon_loading';
 import { displaySnackNotification } from '@services/states/app';
 import { getMessageByCode } from '@services/i18n/translation';
 import { schedulesStartAutofill } from '@services/app/autofill';
+import Tooltip from '@components/tooltip';
+import useAppTranslation from '@hooks/useAppTranslation';
 
 const WeekBadge = (props: WeekBadgeType) => {
+  const { t } = useAppTranslation();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAutofill = async (e: MouseEvent) => {
@@ -49,21 +52,27 @@ const WeekBadge = (props: WeekBadgeType) => {
         {props.text}
       </Typography>
       {props.week && (
-        <IconButton
-          onClick={handleAutofill}
-          disabled={isProcessing}
-          sx={{
-            padding: '4px',
-            position: 'absolute',
-            right: '4px',
-          }}
+        <Tooltip
+          title={t('tr_autofillThisWeek')}
+          show={!isProcessing}
+          placement="top"
         >
-          {isProcessing ? (
-            <IconLoading width={16} height={16} color="var(--accent-dark)" />
-          ) : (
-            <IconGenerate color="var(--accent-dark)" />
-          )}
-        </IconButton>
+          <IconButton
+            onClick={handleAutofill}
+            disabled={isProcessing}
+            sx={{
+              padding: '4px',
+              position: 'absolute',
+              right: '4px',
+            }}
+          >
+            {isProcessing ? (
+              <IconLoading width={16} height={16} color="var(--accent-dark)" />
+            ) : (
+              <IconGenerate color="var(--accent-dark)" />
+            )}
+          </IconButton>
+        </Tooltip>
       )}
     </Box>
   );
