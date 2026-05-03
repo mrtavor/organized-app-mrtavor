@@ -18,7 +18,7 @@ import {
   userDataViewState,
 } from '@states/settings';
 import { sourcesState } from '@states/sources';
-import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAtomValue } from 'jotai';
 
 const useMonthlyView = () => {
@@ -41,58 +41,6 @@ const useMonthlyView = () => {
   const currentYear = new Date().getFullYear().toString();
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedWeeks, setSelectedWeeks] = useState<string[]>([]);
-
-  const [weeksTypes, setWeeksTypes] = useState(
-    Array(selectedWeeks.length).fill(Week.NORMAL)
-  );
-  const [ayfCount, setAyfCount] = useState(Array(selectedWeeks.length).fill(1));
-  const [ayfParts1, setAyfParts1] = useState<AssignmentCode[]>(
-    Array(selectedWeeks.length).fill(null)
-  );
-  const [ayfParts2, setAyfParts2] = useState<AssignmentCode[]>(
-    Array(selectedWeeks.length).fill(null)
-  );
-  const [ayfParts3, setAyfParts3] = useState<AssignmentCode[]>(
-    Array(selectedWeeks.length).fill(null)
-  );
-  const [ayfParts4, setAyfParts4] = useState<AssignmentCode[]>(
-    Array(selectedWeeks.length).fill(null)
-  );
-  const [isTalkAYFParts1, setIsTalkAYFParts1] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [isTalkAYFParts2, setIsTalkAYFParts2] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [isTalkAYFParts3, setIsTalkAYFParts3] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [isTalkAYFParts4, setIsTalkAYFParts4] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [lcCount, setLcCount] = useState(Array(selectedWeeks.length).fill(1));
-  const [customPartEnabled, setCustomPartEnabled] = useState(
-    Array(selectedWeeks.length).fill(true)
-  );
-  const [lcNoAssignParts1, setLcNoAssignParts1] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [lcNoAssignParts2, setLcNoAssignParts2] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [lcNoAssignParts3, setLcNoAssignParts3] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [isOverwriteLCParts1, setIsOverwriteLCParts1] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [isOverwriteLCParts2, setIsOverwriteLCParts2] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
-  const [hasCustomPart, setHasCustomPart] = useState(
-    Array(selectedWeeks.length).fill(false)
-  );
 
   const [openTGW, setOpenTGW] = useState(true);
   const [openAYF, setOpenAYF] = useState(true);
@@ -121,12 +69,185 @@ const useMonthlyView = () => {
     return set;
   }, [sources, currentYear, lang, meetingWeekday]);
 
-  const getWeekLocale = (date: number, month: string) => {
-    return t('tr_longDateNoYearLocale', {
-      date,
-      month,
+  // Index maps for O(1) lookups instead of repeated .find() (js-index-maps rule).
+  const sourcesByWeek = useMemo(
+    () => new Map(sources.map((s) => [s.weekOf, s])),
+    [sources]
+  );
+
+  const schedulesByWeek = useMemo(
+    () => new Map(schedules.map((s) => [s.weekOf, s])),
+    [schedules]
+  );
+
+  // Derive weeks for the selected month (rerender-derived-state-no-effect rule).
+  const selectedWeeks = useMemo(() => {
+    return sources
+      .filter((s) => {
+        if (!s.midweek_meeting?.week_date_locale?.[lang]?.length) return false;
+        const meetingDate = addDays(s.weekOf, meetingWeekday);
+        return (
+          meetingDate.getFullYear().toString() === currentYear &&
+          meetingDate.getMonth() === selectedMonth
+        );
+      })
+      .map((s) => s.weekOf)
+      .sort();
+  }, [currentYear, selectedMonth, sources, lang, meetingWeekday]);
+
+  // Derive week types from schedules.
+  const weeksTypes = useMemo(() => {
+    return selectedWeeks.map((weekOf) => {
+      const schedule = schedulesByWeek.get(weekOf);
+      const weekType = schedule?.midweek_meeting?.week_type?.find(
+          (record) => record.type === dataView
+        );
+      return weekType || { type: dataView, value: Week.NORMAL, updatedAt: '' };
     });
-  };
+  }, [selectedWeeks, schedulesByWeek, dataView]);
+
+  // Derive AYF data from sources.
+  const {
+    ayfCount,
+    ayfParts1,
+    ayfParts2,
+    ayfParts3,
+    ayfParts4,
+    isTalkAYFParts1,
+    isTalkAYFParts2,
+    isTalkAYFParts3,
+    isTalkAYFParts4,
+  } = useMemo(() => {
+    const counts: number[] = [];
+    const parts: AssignmentCode[][] = [[], [], [], []];
+    const isTalk: boolean[][] = [[], [], [], []];
+
+    for (const weekOf of selectedWeeks) {
+      const source = sourcesByWeek.get(weekOf);
+
+      counts.push(source?.midweek_meeting?.ayf_count[lang] || 3);
+
+      for (let i = 0; i < 4; i++) {
+        const ayfPart = source?.midweek_meeting[`ayf_part${i + 1}`];
+
+        let partType = ayfPart?.type[lang];
+        if (!partType || partType === 0) {
+          partType = AssignmentCode.MM_StartingConversation;
+        }
+
+        parts[i].push(partType);
+        isTalk[i].push(
+          partType === AssignmentCode.MM_ExplainingBeliefs
+            ? sourcesCheckAYFExplainBeliefsAssignment(
+                ayfPart?.src[lang],
+                lang
+              )
+            : false
+        );
+      }
+    }
+
+    return {
+      ayfCount: counts,
+      ayfParts1: parts[0],
+      ayfParts2: parts[1],
+      ayfParts3: parts[2],
+      ayfParts4: parts[3],
+      isTalkAYFParts1: isTalk[0],
+      isTalkAYFParts2: isTalk[1],
+      isTalkAYFParts3: isTalk[2],
+      isTalkAYFParts4: isTalk[3],
+    };
+  }, [selectedWeeks, sourcesByWeek, lang]);
+
+  // Derive LC data from sources.
+  const {
+    lcCount,
+    customPartEnabled,
+    hasCustomPart,
+    lcNoAssignParts1,
+    lcNoAssignParts2,
+    lcNoAssignParts3,
+    isOverwriteLCParts1,
+    isOverwriteLCParts2,
+  } = useMemo(() => {
+    const counts: number[] = [];
+    const customEnabled: boolean[] = [];
+    const hasCustom: boolean[] = [];
+    const lcNoAssign: boolean[][] = [[], [], []];
+    const isOverwrite: boolean[][] = [[], []];
+
+    for (const weekOf of selectedWeeks) {
+      const source = sourcesByWeek.get(weekOf);
+
+      const lcCountOverride =
+        source?.midweek_meeting?.lc_count?.override?.find(
+          (record) => record.type === dataView
+        )?.value || 0;
+
+      const lcCountVal =
+        source?.midweek_meeting?.lc_count?.default?.[lang] || 0;
+
+      counts.push(lcCountVal);
+      customEnabled.push(lcCountOverride < lcCountVal + 1);
+      hasCustom.push(lcCountOverride > lcCountVal);
+
+      for (let i = 0; i < 2; i++) {
+        const lcSrcPart =
+          source?.midweek_meeting?.[`lc_part${i + 1}`];
+
+        const lcSrcOverride = lcSrcPart?.title?.override?.find(
+          (record) => record.type === dataView
+        )?.value;
+
+        const lcSrcDefault =
+          source?.midweek_meeting?.[`lc_part${i + 1}`]?.title?.default?.[lang];
+
+        const lcSrc =
+          lcSrcOverride?.length > 0 ? lcSrcOverride : lcSrcDefault;
+
+        isOverwrite[i].push(lcSrcOverride?.length > 0);
+        lcNoAssign[i].push(
+          lcSrc?.length > 0
+            ? sourcesCheckLCAssignments(lcSrc, lang)
+            : false
+        );
+      }
+
+      // LC part 3
+      const lc3Src =
+        source?.midweek_meeting?.lc_part3?.title?.find(
+          (record) => record.type === dataView
+        )?.value || '';
+
+      lcNoAssign[2].push(
+        lc3Src.length > 0
+          ? sourcesCheckLCAssignments(lc3Src, lang)
+          : false
+      );
+    }
+
+    return {
+      lcCount: counts,
+      customPartEnabled: customEnabled,
+      hasCustomPart: hasCustom,
+      lcNoAssignParts1: lcNoAssign[0],
+      lcNoAssignParts2: lcNoAssign[1],
+      lcNoAssignParts3: lcNoAssign[2],
+      isOverwriteLCParts1: isOverwrite[0],
+      isOverwriteLCParts2: isOverwrite[1],
+    };
+  }, [selectedWeeks, sourcesByWeek, dataView, lang]);
+
+  const getWeekLocale = useCallback(
+    (date: number, month: string) => {
+      return t('tr_longDateNoYearLocale', {
+        date,
+        month,
+      });
+    },
+    [t]
+  );
 
   const showDoublePerson = weeksTypes.map((week) => {
     return week.value !== Week.CO_VISIT;
@@ -134,7 +255,7 @@ const useMonthlyView = () => {
 
   const showAYFPartAssistant = (
     ayfPart: AssignmentCode[],
-    isTalkAYFPart: unknown[]
+    isTalkAYFPart: boolean[]
   ) => {
     return ayfPart.map((value, index) => {
       return (
@@ -180,18 +301,6 @@ const useMonthlyView = () => {
 
   const handleToggleLC = () => setOpenLC((prev) => !prev);
 
-  const changeValueInArrayState = (
-    func: (value: SetStateAction<unknown[]>) => void,
-    index: number,
-    value: unknown
-  ) => {
-    func((prev) => {
-      const newTmpArray = [...prev];
-      newTmpArray[index] = value;
-      return newTmpArray;
-    });
-  };
-
   // Clamp selectedMonth to an available month when the current selection has no data.
   // This prevents rendering an empty month and jumps to the closest available month.
   useEffect(() => {
@@ -200,178 +309,8 @@ const useMonthlyView = () => {
     }
   }, [availableMonthIndices, selectedMonth]);
 
-  useEffect(() => {
-    const monthWeeks = sources
-      .filter((s) => {
-        if (!s.midweek_meeting?.week_date_locale?.[lang]?.length) return false;
-        const meetingDate = addDays(s.weekOf, meetingWeekday);
-        return (
-          meetingDate.getFullYear().toString() === currentYear &&
-          meetingDate.getMonth() === selectedMonth
-        );
-      })
-      .map((s) => s.weekOf)
-      .sort();
-    setSelectedWeeks(monthWeeks);
-  }, [currentYear, selectedMonth, sources, lang, meetingWeekday]);
-
-  // Reset all parallel state arrays when the selected month changes and
-  // selectedWeeks grows or shrinks. Without this, out-of-bounds indices
-  // cause EmptyAssignment to render instead of PersonSelector for the
-  // extra/missing weeks (the stale-array-size bug).
-  useEffect(() => {
-    const len = selectedWeeks.length;
-    setWeeksTypes(Array(len).fill(Week.NORMAL));
-    setAyfCount(Array(len).fill(1));
-    setAyfParts1(Array(len).fill(null));
-    setAyfParts2(Array(len).fill(null));
-    setAyfParts3(Array(len).fill(null));
-    setAyfParts4(Array(len).fill(null));
-    setIsTalkAYFParts1(Array(len).fill(false));
-    setIsTalkAYFParts2(Array(len).fill(false));
-    setIsTalkAYFParts3(Array(len).fill(false));
-    setIsTalkAYFParts4(Array(len).fill(false));
-    setLcCount(Array(len).fill(1));
-    setCustomPartEnabled(Array(len).fill(true));
-    setHasCustomPart(Array(len).fill(false));
-    setLcNoAssignParts1(Array(len).fill(false));
-    setLcNoAssignParts2(Array(len).fill(false));
-    setLcNoAssignParts3(Array(len).fill(false));
-    setIsOverwriteLCParts1(Array(len).fill(false));
-    setIsOverwriteLCParts2(Array(len).fill(false));
-  }, [selectedWeeks]);
-
-  useEffect(() => {
-    selectedWeeks.forEach((value, index) => {
-      const schedule = schedules.find((record) => record.weekOf === value);
-
-      const weekType = schedule?.midweek_meeting?.week_type?.find(
-        (record) => record.type === dataView
-      );
-
-      changeValueInArrayState(setWeeksTypes, index, weekType || Week.NORMAL);
-    });
-  }, [selectedWeeks, schedules, dataView]);
-
-  useEffect(() => {
-    const ayfPartsSetters = [
-      setAyfParts1,
-      setAyfParts2,
-      setAyfParts3,
-      setAyfParts4,
-    ];
-
-    const isTalkAYFPartsSetters = [
-      setIsTalkAYFParts1,
-      setIsTalkAYFParts2,
-      setIsTalkAYFParts3,
-      setIsTalkAYFParts4,
-    ];
-
-    selectedWeeks.forEach((value, index) => {
-      const source = sources.find((record) => record.weekOf === value);
-
-      changeValueInArrayState(
-        setAyfCount,
-        index,
-        source?.midweek_meeting?.ayf_count[lang] || 3
-      );
-
-      ayfPartsSetters.forEach((setter, setterIndex) => {
-        const ayfPart = source?.midweek_meeting[`ayf_part${setterIndex + 1}`];
-
-        let partType = ayfPart?.type[lang];
-        if (!partType || partType === 0) {
-          partType = AssignmentCode.MM_StartingConversation;
-        }
-
-        changeValueInArrayState(setter, index, partType);
-
-        if (partType === AssignmentCode.MM_ExplainingBeliefs) {
-          changeValueInArrayState(
-            isTalkAYFPartsSetters[setterIndex],
-            index,
-            sourcesCheckAYFExplainBeliefsAssignment(ayfPart?.src[lang], lang)
-          );
-        }
-      });
-    });
-  }, [lang, selectedWeeks, sources]);
-
-  useEffect(() => {
-    const lcNoAssignPartsSetters = [setLcNoAssignParts1, setLcNoAssignParts2];
-
-    const isOverwriteLCPartsSetters = [
-      setIsOverwriteLCParts1,
-      setIsOverwriteLCParts2,
-    ];
-
-    selectedWeeks.forEach((value, index) => {
-      const source = sources.find((record) => record.weekOf === value);
-
-      const lcCountOverride =
-        source?.midweek_meeting?.lc_count?.override?.find(
-          (record) => record.type === dataView
-        )?.value || 0;
-
-      const lcCount = source?.midweek_meeting?.lc_count?.default?.[lang] || 0;
-
-      changeValueInArrayState(setLcCount, index, lcCount);
-
-      changeValueInArrayState(
-        setCustomPartEnabled,
-        index,
-        lcCountOverride < lcCount + 1
-      );
-
-      changeValueInArrayState(
-        setHasCustomPart,
-        index,
-        lcCountOverride > lcCount
-      );
-
-      lcNoAssignPartsSetters.forEach((setter, setterIndex) => {
-        const lcSrcPart = source?.midweek_meeting?.[`lc_part${setterIndex + 1}`];
-
-        const lcSrcOverride = lcSrcPart?.title?.override?.find(
-          (record) => record.type === dataView
-        )?.value;
-
-        const lcSrcDefault =
-          source?.midweek_meeting?.[`lc_part${setterIndex + 1}`]?.title?.default?.[
-          lang
-          ];
-
-        const lcSrc = lcSrcOverride?.length > 0 ? lcSrcOverride : lcSrcDefault;
-
-        if (setterIndex + 1 === 1 || setterIndex + 1 === 2) {
-          changeValueInArrayState(
-            isOverwriteLCPartsSetters[setterIndex],
-            index,
-            lcSrcOverride?.length > 0
-          );
-        }
-
-        if (lcSrc?.length > 0) {
-          const noAssign = sourcesCheckLCAssignments(lcSrc, lang);
-          changeValueInArrayState(setter, index, noAssign);
-        }
-      });
-
-      const lc3Src =
-        source?.midweek_meeting?.lc_part3?.title?.find(
-          (record) => record.type === dataView
-        )?.value || '';
-
-      if (lc3Src.length > 0) {
-        const noAssign = sourcesCheckLCAssignments(lc3Src, lang);
-        changeValueInArrayState(setLcNoAssignParts3, index, noAssign);
-      }
-    });
-  }, [dataView, lang, selectedWeeks, sources]);
-
   const handleAddCustomLCPart = async (week: string) => {
-    const source = sources.find((record) => record.weekOf === week);
+    const source = sourcesByWeek.get(week);
     const lcCount = source.midweek_meeting.lc_count;
     const lcCountOverride = structuredClone(lcCount.override);
 
