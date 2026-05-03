@@ -121,14 +121,10 @@ const useMonthlyView = () => {
     return set;
   }, [sources, currentYear, lang, meetingWeekday]);
 
-  const thisYearMonths = monthNames;
-
-  const monthName = thisYearMonths[selectedMonth];
-
-  const getWeekLocale = (date, monthName) => {
+  const getWeekLocale = (date: number, month: string) => {
     return t('tr_longDateNoYearLocale', {
       date,
-      month: monthName,
+      month,
     });
   };
 
@@ -420,7 +416,7 @@ const useMonthlyView = () => {
   return {
     // General Settings
     currentYear,
-    thisYearMonths,
+    monthNames,
     availableMonthIndices,
     openingPrayerLinked,
     closingPrayerLinked,
@@ -428,11 +424,9 @@ const useMonthlyView = () => {
     meetingWeekday,
 
     // Selected Month & Week Information
-    monthName,
     selectedMonth,
     setSelectedMonth,
     selectedWeeks,
-    weeksTypes,
     getWeekLocale,
 
     // Counts

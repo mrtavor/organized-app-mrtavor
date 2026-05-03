@@ -30,7 +30,7 @@ const MonthlyView = () => {
     getWeekLocale,
     currentYear,
     selectedMonth,
-    thisYearMonths,
+    monthNames,
     availableMonthIndices,
     setSelectedMonth,
     classCount,
@@ -106,7 +106,7 @@ const MonthlyView = () => {
               setSelectedMonth(parseInt(e.target.value as string))
             }
           >
-            {thisYearMonths?.map((value, index) => {
+            {monthNames?.map((value, index) => {
               if (!availableMonthIndices.has(index)) return null;
               return (
                 <MenuItem value={index} key={index}>
@@ -123,7 +123,7 @@ const MonthlyView = () => {
                 week={value}
                 text={getWeekLocale(
                   meetingDate.getDate(),
-                  thisYearMonths[meetingDate.getMonth()]
+                  monthNames[meetingDate.getMonth()]
                 )}
               />
             );

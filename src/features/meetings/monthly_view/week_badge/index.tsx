@@ -1,14 +1,14 @@
+import useAppTranslation from '@hooks/useAppTranslation';
 import { useState, MouseEvent } from 'react';
 import Typography from '@components/typography';
+import Tooltip from '@components/tooltip';
+import IconLoading from '@components/icon_loading';
+import { IconGenerate } from '@components/icons';
 import { Box, IconButton } from '@mui/material';
 import { WeekBadgeType } from './index.types';
-import { IconGenerate } from '@components/icons';
-import IconLoading from '@components/icon_loading';
+import { schedulesStartAutofill } from '@services/app/autofill';
 import { displaySnackNotification } from '@services/states/app';
 import { getMessageByCode } from '@services/i18n/translation';
-import { schedulesStartAutofill } from '@services/app/autofill';
-import Tooltip from '@components/tooltip';
-import useAppTranslation from '@hooks/useAppTranslation';
 
 const WeekBadge = (props: WeekBadgeType) => {
   const { t } = useAppTranslation();
@@ -21,15 +21,15 @@ const WeekBadge = (props: WeekBadgeType) => {
     try {
       setIsProcessing(true);
       await schedulesStartAutofill(props.week, props.week, 'midweek');
-      setIsProcessing(false);
     } catch (error) {
       console.error(error);
-      setIsProcessing(false);
       displaySnackNotification({
         header: getMessageByCode('error_app_generic-title'),
-        message: getMessageByCode((error as Error).message),
+        message: getMessageByCode(error.message),
         severity: 'error',
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
